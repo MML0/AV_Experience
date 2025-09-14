@@ -102,78 +102,9 @@
 
 
 <div id="stage-3" class="stage">
-    <div class="w-full max-w-4xl">
-        <div class="card p-6">
-            <div class="text-center mb-6">
-                <h2 class="text-white text-2xl">تجربه تعاملی <span class="english-text">Wenods</span></h2>
-            </div>
-
-            <div class="space-y-6">
-                <!-- بخش دوربین -->
-                <div class="text-center">
-                    <div class="bg-black rounded-lg p-4 mb-4">
-                        <video id="camera-preview" class="w-full h-64 bg-gray-800 rounded-lg flex items-center justify-center" autoplay muted></video>
-                    </div>
-                    <div class="flex gap-2 justify-center mb-4">
-                        <button id="rotate-camera" class="btn bg-green-600 hover:bg-green-700 text-white">چرخش دوربین</button>
-                        <button id="take-photo" class="btn bg-red-600 hover:bg-red-700 text-white">عکس برداری</button>
-                    </div>
-                </div>
-
-                <!-- گالری عکس‌های گرفته شده -->
-                <div id="photo-preview" class="hidden">
-                    <h3 class="text-white text-lg mb-2">عکس‌های گرفته‌شده:</h3>
-                    <div id="photo-gallery" class="gallery-container"></div>
-                </div>
-
-<div id="photo-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex flex-col items-center justify-center z-50">
-    <span id="close-modal" class="absolute top-4 right-6 text-white text-3xl cursor-pointer">&times;</span>
-    <img id="modal-img" src="" class="max-h-full max-w-full rounded-lg shadow-lg mb-4">
-
-    <div class="flex gap-4 mt-4">
-        <button id="back-to-stage5" class="back-btn">بازگشت</button>
-        <a id="download-photo" class="download-btn" download="photo.png">دانلود</a>
-    </div>
-</div>
-
-                <!-- بخش موزیک و افکت‌ها -->
-<!-- دکمه باز کردن پنل -->
-<button id="toggle-effects" class="btn btn-circle">🎵</button>
-
-<!-- پنل افکت و موزیک -->
-<div id="effects-panel" class="hidden fixed bottom-0 right-0 w-full md:w-96 bg-black/70 backdrop-blur-md p-4 rounded-t-lg shadow-lg z-50">
-    <h3 class="text-white text-lg font-semibold mb-4">انتخاب موزیک</h3>
-    <div class="grid grid-cols-2 gap-2 mb-4">
-        <button class="btn btn-outline">پاپ</button>
-        <button class="btn btn-outline">راک</button>
-        <button class="btn btn-outline">الکترونیک</button>
-        <button class="btn btn-outline">کلاسیک</button>
-    </div>
-  
-</div>
-
-                        <h3 class="text-white text-lg font-semibold mb-4">کنترل افکت‌ها</h3>
-                        <div class="space-y-3">
-                            <div>
-                                <label class="text-white text-sm block mb-2">شدت افکت‌ها</label>
-                                <input type="range" class="w-full">
-                            </div>
-                            <div>
-                                <label class="text-white text-sm block mb-2">سرعت افکت‌ها</label>
-                                <input type="range" class="w-full">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ادامه به مرحله بعد -->
-                <div class="text-center mt-4">
-                    <button id="continue-final" class="btn bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-8">
-                        ادامه به مرحله بعد
-                    </button>
-                </div>
-            </div>
-        </div>
+    <div class="main_stage_3">
+        <iframe id="particleFrame" src="http://127.0.0.1:5501/Front/Particle/index.html" width="100vw" height="100vh" style="position: absolute; top: 0; left: 0; z-index: -1; border: none; width: 100%;
+    height: 100%;"></iframe>
     </div>
 </div>
 

@@ -1,16 +1,32 @@
 const db_url = 'http://127.0.0.1:3000/backend/data.php';
 window.onload = function() {
+    const userId = getCookie('user_id');
+        
+    if (userId) {
+        console.log(userId);
+        
+        // If user_id exists in the cookie, fetch the user data
+        // fetch(db_url + '?action=user&user_id=' + userId, {
+        //     method: 'GET',
+        //     headers: {
+        //         'Content-Type': 'application/json'
+        //     }
+        // })
+        // .then(response => response.json())
+        // .then(data => {
+        //     if (data.status === 'success') {
+        //         // Log the user's name if the response is successful
+        //         console.log('User Name:', data.user.name);
+        //     } else {
+        //         console.error('Error fetching user data:', data.message);
+        //     }
+        // })
+        // .catch(error => console.error('Error:', error));
+    } else {
+        console.log('No user_id found in the cookie');
+    }
+
     const logo = document.querySelector('.logo');
-    
-    // ابتدا لوگو را نمایش بده
-    // logo.style.display = 'block';
-
-    // بعد از 1 ثانیه لوگو محو شود و Stage 0 نمایش داده شود
-    // setTimeout(() => {
-    //     logo.style.display = 'none';
-    //     showStage(0);
-    // }, 1000); // 1 ثانیه
-
     // انیمیشن گرادیانت
     let angle = 237;
     let direction = 1;
@@ -79,11 +95,15 @@ function showStage(stageNumber) {
         logo.style.left = '50%';
         logo.style.opacity = 1;
         logo.classList.add('fade-in');
-        
+        setTimeout(() => {
+            document.querySelectorAll('.stage').forEach(stage => stage.classList.remove('active'));
+            const current = document.getElementById(`stage-${stageNumber}`);
+            if (current) current.classList.add('active');
+        }, 2000);
         return
-        // startCamera();  
 
-    } else stopCamera();
+
+    } 
 
     setTimeout(() => {
         document.querySelectorAll('.stage').forEach(stage => stage.classList.remove('active'));
@@ -143,6 +163,12 @@ document.getElementById('start-btn').addEventListener('click', function(e) {
             const line = document.querySelector('.angled-line');
             fadeOutAndRemove(line, 800); // duration in ms
             console.log('User ID:', data.user_id); // Log the user_id
+            const userId = data.user_id;
+            const expirationDate = new Date();
+            expirationDate.setTime(expirationDate.getTime() + (24 * 60 * 60 * 1000)); // 1 day expiration
+            
+            document.cookie = `user_id=${userId}; expires=${expirationDate.toUTCString()}; path=/`;
+
             showStage(1);
         } else {
             console.error('Error:', data.message);
@@ -164,24 +190,15 @@ document.getElementById('story-next-2')?.addEventListener('click', function(e){
 
 
 
-let cameraStream;
-function startCamera() {
-    const video = document.getElementById('camera-preview');
-    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        navigator.mediaDevices.getUserMedia({ video: true })
-        .then(stream => { 
-            video.srcObject = stream; 
-        })
-        .catch(err => {
-            console.error("دوربین فعال نشد:", err);
-        });
-    }
-}
 
-function stopCamera() {
-    const video = document.getElementById('camera-preview');
-    if(video.srcObject) {
-        video.srcObject.getTracks().forEach(track => track.stop());
-        video.srcObject = null;
+
+
+function getCookie(name) {
+    const nameEQ = name + "=";
+    const ca = document.cookie.split(';');
+    for (let i = 0; i < ca.length; i++) {
+        let c = ca[i].trim();
+        if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
     }
+    return null;
 }
