@@ -42,10 +42,11 @@ function json_error($message, $code = 400) {
     exit;
 }
 
+// Switch for handling POST and GET requests
 switch ($_SERVER['REQUEST_METHOD']) {
     case 'POST':
         if ($action === 'register') {
-            // required: name, email, phone
+            // Get required fields from input
             $name  = trim((string)($input['name'] ?? ''));
             $email = trim((string)($input['email'] ?? ''));
             $phone = trim((string)($input['phone'] ?? ''));
@@ -56,37 +57,43 @@ switch ($_SERVER['REQUEST_METHOD']) {
             if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
                 json_error('Invalid email format');
             }
+            if (!preg_match('/^09\d{9}$/', $phone)) {
+                json_error('Phone number must be 11 digits and start with 09');
+            }
+
+            // Generate a random user_id using uniqid() with username for uniqueness
+            $userId = uniqid($name . "_", true); // Generates a unique ID based on username (prepend name for uniqueness)
 
             try {
-                // Upsert by email/phone (unique indexes); return existing id if present
+                // Prepare the upsert query (insert or update based on unique constraint)
                 $stmt = $pdo->prepare("
-                    INSERT INTO users (name, email, phone)
-                    VALUES (:name, :email, :phone)
-                    ON DUPLICATE KEY UPDATE
-                        name = VALUES(name),
-                        phone = VALUES(phone),
-                        id = LAST_INSERT_ID(id),
-                        updated_at = CURRENT_TIMESTAMP
+                    INSERT INTO users (user_id, name, email, phone)
+                    VALUES (:user_id, :name, :email, :phone)
+                    ON DUPLICATE KEY UPDATE 
+                        name = VALUES(name), 
+                        phone = VALUES(phone)
                 ");
+
+                // Execute the query with the input values
                 $stmt->execute([
-                    ':name'  => $name,
-                    ':email' => $email,
-                    ':phone' => $phone,
+                    ':user_id' => $userId,  // Use the generated user_id
+                    ':name'    => $name,
+                    ':email'   => $email,
+                    ':phone'   => $phone,
                 ]);
 
-                $userId = (int)$pdo->lastInsertId();
+                // Send success response with the generated user_id
                 http_response_code(201);
                 echo json_encode([
                     'status'  => 'success',
-                    'user_id' => $userId
+                    'user_id' => $userId // Return the unique user_id
                 ], JSON_UNESCAPED_UNICODE);
                 exit;
             } catch (PDOException $e) {
-                // If something else goes wrong
-                json_error('Could not save user', 500);
+                // Handle database errors
+                json_error('Could not save user: ' . $e->getMessage(), 500);
             }
         }
-
         json_error('Unknown POST action', 404);
 
     case 'GET':
@@ -100,6 +107,12 @@ switch ($_SERVER['REQUEST_METHOD']) {
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
             if (!$user) json_error('User not found', 404);
 
+            if (isset($user['phone'])) {
+                $phone = $user['phone'];
+                // Mask middle part of phone number
+                $maskedPhone = substr($phone, 0, 4) . '****' . substr($phone, -4);
+                $user['phone'] = $maskedPhone;  // Replace the phone number with the masked version
+            }
             echo json_encode(['status' => 'success', 'user' => $user], JSON_UNESCAPED_UNICODE);
             exit;
         }

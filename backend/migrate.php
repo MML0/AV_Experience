@@ -26,15 +26,16 @@ if ($fresh) {
     echo "Dropped old 'users' table.\n";
 }
 
+// Create the table with the new user_id field as a VARCHAR and unique constraint
 $createTableSQL = "
 CREATE TABLE IF NOT EXISTS `users` (
-    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `user_id` VARCHAR(255) NOT NULL,
     `name` VARCHAR(191) NOT NULL,
     `email` VARCHAR(191) NOT NULL,
     `phone` VARCHAR(32) NOT NULL,
     `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at` TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY (`id`),
+    PRIMARY KEY (`user_id`),  -- Set user_id as the primary key
     UNIQUE KEY `uq_users_email` (`email`),
     UNIQUE KEY `uq_users_phone` (`phone`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

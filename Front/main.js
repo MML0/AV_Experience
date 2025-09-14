@@ -1,3 +1,4 @@
+const db_url = 'http://127.0.0.1:3000/backend/data.php';
 window.onload = function() {
     const logo = document.querySelector('.logo');
     
@@ -108,18 +109,49 @@ function load_particle() {
 }
 
 
-document.getElementById('start-btn').addEventListener('click', function(e){
-    // e.preventDefault(); 
-    // const form = document.getElementById('registration-form');
-    // if (1) {
-    //     form.reportValidity(); // shows the default “missing value” warning
-    //     return; // stop if invalid
-    // }
+document.getElementById('start-btn').addEventListener('click', function(e) {
     e.preventDefault(); 
-    const line = document.querySelector('.angled-line');
-    fadeOutAndRemove(line, 800); // duration in ms
-    showStage(1);
+    const form = document.getElementById('registration-form');
+
+    if (!form.checkValidity()) {
+        form.reportValidity(); // Shows the default “missing value” warning
+        return; // stop if invalid
+    }
+
+    const name = document.getElementById('name').value;
+    const email = document.getElementById('email').value;
+    const phone = document.getElementById('phone').value;
+
+    const data = {
+        name: name,
+        email: email,
+        phone: phone
+    };
+
+    fetch(db_url+'?action=register', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Check if the response was successful
+        if (data.status === 'success') {
+            // Fade out and remove the line (UI transition)
+            const line = document.querySelector('.angled-line');
+            fadeOutAndRemove(line, 800); // duration in ms
+            console.log('User ID:', data.user_id); // Log the user_id
+            showStage(1);
+        } else {
+            console.error('Error:', data.message);
+        }
+    })
+    .catch((error) => console.error('Error:', error));
+
 });
+
 
 document.getElementById('story-next-1')?.addEventListener('click', function(e){
     e.preventDefault();
