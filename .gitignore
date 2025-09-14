@@ -1,0 +1,5 @@
+Front/asset/fonts/*.otf
+Front/asset/fonts/*.ttf
+backend/config.php
+Front/qrcode.min.js
+Front/qrtest.html

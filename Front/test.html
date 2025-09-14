@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Particle Visualizer Controller</title>
+    <style>
+body{
+    overflow: hidden;
+}
+iframe{
+    position: absolute;
+    top: 0px;
+    left: 0;
+    z-index: -1;
+    height: 99vh;
+    border: none;
+}
+    </style>
+</head>
+<body>
+    
+    <!-- <h1>Control Particle Visualizer</h1> -->
+    
+    <!-- Sliders for controlling height and threshold -->
+    <label for="heightSlider">Height Scale:</label>
+    <input type="range" id="heightSlider" min="-10" max="10" step="0.02" value="0.1" />
+    <span id="heightValue">5</span>
+    
+    <br>
+    
+    <label for="thresholdSlider">Threshold:</label>
+    <input type="range" id="thresholdSlider" min="0" max="1" step="0.01" value="0.1" />
+    <span id="thresholdValue">0.7</span>
+
+    <br>
+
+    <label for="noiseAmountSlider">Noise Amount:</label>
+    <input type="range" id="noiseAmountSlider" min="0" max="1" step="0.05" value="0.1" />
+    <span id="noiseAmountValue">0.1</span>
+
+    <br>
+    <br>
+
+    <!-- Button to trigger randomization -->
+    <button onclick="randomizeSliders()" style="height: 35px;">Randomize Sliders</button>
+
+
+    <!-- Button for downloading frame -->
+    <button id="downloadButton"  style="height: 35px;" >Download Frame</button>
+
+    <!-- Audio element to play the song -->
+    <audio id="audioPlayer" controls>
+        <source src="http://127.0.0.1:5502/threejs-webcam-particle-visualizer-master/threejs-webcam-particle-visualizer-master/s.mp3" type="audio/mp3">
+        Your browser does not support the audio element.
+    </audio>
+
+    <!-- Iframe to load the particle visualizer -->
+    <iframe id="particleFrame" src="Particle/index.html" width="100%" height="500px"></iframe>
+
+    <script>
+        // Elements
+        
+        const heightSlider = document.getElementById("heightSlider");
+        const thresholdSlider = document.getElementById("thresholdSlider");
+        const downloadButton = document.getElementById("downloadButton");
+        const audioPlayer = document.getElementById("audioPlayer");
+        const noiseAmountSlider = document.getElementById("noiseAmountSlider");
+
+        // Function to send the height scale and threshold values to iframe
+        const updateIframe = () => {
+            const heightValue = heightSlider.value;
+            const thresholdValue = thresholdSlider.value;
+            const noiseAmountValue = noiseAmountSlider.value;
+
+            // Send data to the iframe
+            const iframe = document.getElementById('particleFrame');
+            iframe.contentWindow.postMessage({ type: 'setHeight', value: heightValue }, '*');
+            iframe.contentWindow.postMessage({ type: 'setThreshold', value: thresholdValue }, '*');
+            iframe.contentWindow.postMessage({ type: 'setNoiseAmount', value: noiseAmountValue }, '*'); // Set noise amount
+
+            // Update display values
+            document.getElementById('heightValue').textContent = heightValue;
+            document.getElementById('thresholdValue').textContent = thresholdValue;
+            document.getElementById('noiseAmountValue').textContent = noiseAmountValue; // Update noise amount value
+        };
+
+
+        // Event listeners for the sliders
+        heightSlider.addEventListener('input', updateIframe);
+        thresholdSlider.addEventListener('input', updateIframe);
+        // Event listener for the noise amount slider
+        noiseAmountSlider.addEventListener('input', updateIframe);
+
+        // Capture and download the iframe's current frame
+        const captureIframeFrame = () => {
+            const iframe = document.getElementById('particleFrame');
+            if (!iframe || !iframe.contentWindow) {
+                alert('Iframe not ready');
+                return;
+            }
+
+            // Listen for the captured frame
+            const onMsg = (ev) => {
+                if (ev.source !== iframe.contentWindow) return;
+                if (!ev.data || ev.data.type !== 'frame') return;
+
+                window.removeEventListener('message', onMsg);
+
+                const { dataUrl } = ev.data;
+                if (!dataUrl) {
+                    alert('No image returned');
+                    return;
+                }
+
+                // Download the image
+                const a = document.createElement('a');
+                a.href = dataUrl;
+                a.download = 'iframe-frame.png';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            };
+
+            window.addEventListener('message', onMsg);
+
+            // Ask the iframe to capture its current frame
+            iframe.contentWindow.postMessage({ type: 'captureFrame' }, '*');
+        };
+
+        // Event listener for the download button
+        downloadButton.addEventListener('click', captureIframeFrame);
+
+        // Initial update on load
+        updateIframe();
+
+        // Hardcoded Kick and Snare timings (in seconds)
+        const kickTimes = [
+            6.357, 9.082, 9.245, 9.422, 10.398, 10.980, 11.565, 11.662, 11.797, 12.398, 15.318, 15.480, 
+            15.693, 16.630, 16.725, 17.215, 17.310, 17.793, 17.887, 18.225, 18.582, 21.550, 21.713, 21.890, 
+            22.865, 23.448, 23.545, 24.025, 24.120, 24.265, 24.817, 27.773, 27.948, 28.125, 29.098, 29.683, 
+            30.260, 30.355, 30.500, 31.050, 34.358, 35.333, 35.903, 36.002, 36.495, 36.587, 36.733, 37.123, 
+            40.240, 40.415, 41.560, 41.653, 42.142, 42.238, 42.727, 42.822, 42.968, 43.163, 43.568, 46.475, 
+            46.648, 46.888, 47.793, 47.888, 48.377, 48.470, 48.962, 49.055, 49.200, 49.760, 52.720, 52.883, 
+            53.098, 54.032, 54.127, 54.617, 55.195, 55.290, 55.433, 56.035, 56.212, 58.943, 59.115, 59.330, 
+            60.260, 60.355, 60.845, 60.938, 61.435, 61.648, 62.267, 65.175, 65.350, 65.563, 66.500, 67.085, 
+            67.670, 67.903, 68.502
+        ];
+
+        const snareTimes = [
+            0.855, 3.970, 6.808, 8.180, 8.610, 9.643, 10.127, 11.230, 11.730, 12.873, 14.130, 14.803, 16.438, 
+            17.398, 17.650, 19.555, 21.095, 22.675, 23.428, 23.760, 24.230, 24.602, 26.887, 27.350, 27.670, 
+            28.915, 29.668, 31.588, 35.142, 38.255, 38.553, 39.815, 41.383, 41.800, 42.580, 43.208, 44.490, 
+            46.047, 46.355, 47.610, 49.160, 49.955, 52.285, 53.837, 55.398, 56.142, 56.958, 58.458, 60.072, 
+            62.990, 63.970, 64.758, 65.267, 66.313
+        ];
+        // Function to animate sliders
+        function animateController(slider, startValue, endValue, duration, delay = 0) {
+            const startTime = performance.now() + delay;  // Add delay to the start time
+            const easeOutQuad = (t) => t * (2 - t); // Easing function for smooth transition
+
+            function animate() {
+                const elapsedTime = performance.now() - startTime;
+                const progress = Math.min(elapsedTime / duration, 1); // Ensure the progress doesn't go beyond 1
+
+                // Calculate the current value with easing
+                const easedProgress = easeOutQuad(progress);
+                const currentValue = startValue + (endValue - startValue) * easedProgress;
+
+                slider.value = currentValue.toFixed(2); // Set the slider value
+                updateIframe(); // Update the iframe with the new value
+
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                }
+            }
+
+            animate(); // Start the animation
+        }
+
+        // Function to start animations based on the audio player's current time
+        function startAnimationOnAudio() {
+            const audioDuration = audioPlayer.duration;
+            let delay = 0;  // Initialize delay
+
+            // Loop through kick times and snare times to trigger animations
+            kickTimes.forEach(kickTime => {
+                const delayTime = (kickTime - audioPlayer.currentTime) * 1000 + delay; // Convert to milliseconds and add delay
+                setTimeout(() => {
+                    animateController(heightSlider, 5, 7, 200);  // Animate height slider on kick
+                }, delayTime);
+            });
+
+            snareTimes.forEach(snareTime => {
+                const delayTime = (snareTime - audioPlayer.currentTime) * 1000 + delay; // Convert to milliseconds and add delay
+                setTimeout(() => {
+                    animateController(noiseAmountSlider, 0.0, 0.61, 300);  // Animate threshold slider on snare
+                }, delayTime);
+            });
+        }
+
+        // Start animations when the audio starts playing
+        audioPlayer.addEventListener('play', startAnimationOnAudio);
+
+        // Optional: Tune the lag (for earlier or later triggering)
+        // For example, adjust the delay value to speed up or delay the triggering:
+        const delayAdjustment = 0;  // 0 for no adjustment, positive for later, negative for sooner
+                        function animateController(slider, startValue, endValue, duration) {
+            const startTime = performance.now();
+            const easeOutQuad = (t) => t * (2 - t); // Easing function for smooth transition
+
+            function animate() {
+                const elapsedTime = performance.now() - startTime;
+                const progress = Math.min(elapsedTime / duration, 1); // Ensure the progress doesn't go beyond 1
+
+                // Calculate the current value with easing
+                const easedProgress = easeOutQuad(progress);
+                const currentValue = startValue + (endValue - startValue) * easedProgress;
+
+                slider.value = currentValue.toFixed(2); // Set the slider value
+                updateIframe(); // Update the iframe with the new value
+
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                }
+            }
+
+            animate(); // Start the animation
+        }
+
+        // Trigger on page load to animate sliders from a to b
+        window.onload = () => {
+            setTimeout(() => {
+                // Animate height slider from 5 to 8 over 3 seconds
+                animateController(heightSlider, 0.1, 2, 3000);
+
+                // Animate threshold slider from 0.7 to 0.4 over 3 seconds
+                animateController(thresholdSlider, 0.1, 0.8, 2000);
+                // animateController(noiseAmountSlider, 0.1, 0.1, 100);
+
+                
+                const iframe = document.getElementById('particleFrame');
+
+                iframe.contentWindow.postMessage({ type: 'setNoiseAmount', value: 0.9 }, '*');
+
+            }, 1000);
+
+
+
+        };
+        function randomizeSliders() {
+            // Random target values for sliders
+            const heightRandom = (Math.random()-0.5) * 20;
+            const thresholdRandom = (Math.random()+0.2)/1.2; // Between 0 and 1
+            const noiseRandom = (Math.random())*0.9; // Between 0 and 1
+
+            // Animate sliders to new random values
+            animateController(heightSlider, parseFloat(heightSlider.value), heightRandom, 1000);
+            animateController(thresholdSlider, parseFloat(thresholdSlider.value), thresholdRandom, 1000);
+            animateController(noiseAmountSlider, parseFloat(noiseAmountSlider.value), noiseRandom, 1000);
+        
+        }
+    </script>
+</body>
+</html>

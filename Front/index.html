@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <link rel="stylesheet" href="main.css?v=0.5.6">
+    <script src="main.js?v=0.5.6" defer></script>
+    <title>AV Experienc</title>
+    <link rel="preload" as="font" href="asset/fonts/IRANSansX-Regular.otf" type="font/otf" crossorigin>
+    <link rel="preload" as="font" href="asset/fonts/IRANSansX-Thin.otf" type="font/otf" crossorigin>
+<link rel="icon" href="asset/We-Nodes-icon.png" sizes="any"><!-- .ico fallback -->
+<link rel="icon" type="image/png" href="asset/We-Nodes-icon.png"><!-- Modern PNG -->
+</head>
+<body>
+<div class="background_c">
+    <div class="background"></div>
+</div>
+
+     <!-- ارمان اضافه کرده  -->
+
+<div id="stage-0" class="stage active">
+    <div class="w-full max-w-md space-y-2">
+            
+        <div class="text-center registration_margin mb-6">
+            <form id="registration-form" class="space-y-4">
+                <div class="text-white form_main_lable">            
+                    <p class="block text-white mb-2" >ورود به تجربه وینادز</p>
+                </div>
+                
+                <div>
+                    <label class="block text-white mb-2">نام کامل</label>
+                    <input type="text" id="name" class="input text-white text-right"  required>
+                </div>
+
+                <div>
+                    <label class="block text-white mb-2">ایمیل</label>
+                    <input type="email" id="email" class="input text-white" required>
+                </div>
+
+                <div>
+                    <label class="block text-white mb-2">شماره تماس</label>
+                    <input type="tel" id="phone" class="input text-white " required>
+                </div>
+
+                <button type="submit" id="start-btn" class="btn btn-primary w-full">ورود</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div id="stage-1" class="stage">
+
+    <div class="w-full max-w-2xl text-center card_stage_main">
+        <div class="card p-6 card_stage card_stage_1">
+            <h2 class="text-white text-3xl mb-4 fade-in delay-1">همه چیز… از یک نقطه آغاز می‌شود.<br></h2>
+            <p class="text-white/70 text-lg leading-relaxed fade-in delay-2">
+
+            کوچک. خاموش. تنها.<br>
+
+            مثل تو و من.
+            وقتی در جهانِ بی‌پایان، لحظه‌ای تنها می‌شویم.<br>
+            <br>
+            <br>
+            <h2 class="text-white text-3xl mb-4 fade-in delay-3">اما نقطه ها تنها نمی‌مانند.<br> </h2>
+            <p class="no-bold fade-in delay-4">
+                به حرکت درمی‌آیند، به هم می‌رسند,
+                میان‌شان خطی کشیده می‌شود,
+                و تصویری تازه متولد می‌شود.
+            </p>
+        </div>
+        <button id="story-next-1" class="story-next-btn btn btn-primary w-full mt-4">ادامه</button>
+    </div>
+</div>
+
+
+
+<div id="stage-2" class="stage">
+
+    <div class="w-full max-w-2xl text-center card_stage_main">
+        <div class="card card_stage card_stage_2_fade " >
+            <h2 class="text-white text-2xl mb-4 fade-in delay-2-1">آنچه پیش رو داری یک تجریه دیجیتال است از وینادز</h2>
+            <p class="text-white/70 text-lg leading-relaxed fade-in delay-2-2">
+                
+            <br>پنجره‌ای کوچک به دنیایی بزرگ 
+            <br>
+            <br>نسخه‌ی کوچک شده یک اجرای زنده‌ی صدا و تصویر‌ .
+            <br>
+            <br>اینجا می‌توانی در مقیاسی تازه، 
+            همان چیزی را لمس کنی که در صحنه‌های بزرگ جریان دارد.
+            یک شبیه‌ساز A/V؛
+            </p>
+
+            <h2 class="text-white text-2xl mb-4 fade-in delay-2-3">برای اینکه ببینی، بشنوی و در لحظه اجرا کنی. </h2>
+
+        </div>
+        <button id="story-next-2" class="story-next-btn btn btn-primary w-full mt-4">ادامه</button>
+    </div>
+</div>
+
+
+<div id="stage-3" class="stage">
+    <div class="w-full max-w-4xl">
+        <div class="card p-6">
+            <div class="text-center mb-6">
+                <h2 class="text-white text-2xl">تجربه تعاملی <span class="english-text">Wenods</span></h2>
+            </div>
+
+            <div class="space-y-6">
+                <!-- بخش دوربین -->
+                <div class="text-center">
+                    <div class="bg-black rounded-lg p-4 mb-4">
+                        <video id="camera-preview" class="w-full h-64 bg-gray-800 rounded-lg flex items-center justify-center" autoplay muted></video>
+                    </div>
+                    <div class="flex gap-2 justify-center mb-4">
+                        <button id="rotate-camera" class="btn bg-green-600 hover:bg-green-700 text-white">چرخش دوربین</button>
+                        <button id="take-photo" class="btn bg-red-600 hover:bg-red-700 text-white">عکس برداری</button>
+                    </div>
+                </div>
+
+                <!-- گالری عکس‌های گرفته شده -->
+                <div id="photo-preview" class="hidden">
+                    <h3 class="text-white text-lg mb-2">عکس‌های گرفته‌شده:</h3>
+                    <div id="photo-gallery" class="gallery-container"></div>
+                </div>
+
+<div id="photo-modal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex flex-col items-center justify-center z-50">
+    <span id="close-modal" class="absolute top-4 right-6 text-white text-3xl cursor-pointer">&times;</span>
+    <img id="modal-img" src="" class="max-h-full max-w-full rounded-lg shadow-lg mb-4">
+
+    <div class="flex gap-4 mt-4">
+        <button id="back-to-stage5" class="back-btn">بازگشت</button>
+        <a id="download-photo" class="download-btn" download="photo.png">دانلود</a>
+    </div>
+</div>
+
+                <!-- بخش موزیک و افکت‌ها -->
+<!-- دکمه باز کردن پنل -->
+<button id="toggle-effects" class="btn btn-circle">🎵</button>
+
+<!-- پنل افکت و موزیک -->
+<div id="effects-panel" class="hidden fixed bottom-0 right-0 w-full md:w-96 bg-black/70 backdrop-blur-md p-4 rounded-t-lg shadow-lg z-50">
+    <h3 class="text-white text-lg font-semibold mb-4">انتخاب موزیک</h3>
+    <div class="grid grid-cols-2 gap-2 mb-4">
+        <button class="btn btn-outline">پاپ</button>
+        <button class="btn btn-outline">راک</button>
+        <button class="btn btn-outline">الکترونیک</button>
+        <button class="btn btn-outline">کلاسیک</button>
+    </div>
+  
+</div>
+
+                        <h3 class="text-white text-lg font-semibold mb-4">کنترل افکت‌ها</h3>
+                        <div class="space-y-3">
+                            <div>
+                                <label class="text-white text-sm block mb-2">شدت افکت‌ها</label>
+                                <input type="range" class="w-full">
+                            </div>
+                            <div>
+                                <label class="text-white text-sm block mb-2">سرعت افکت‌ها</label>
+                                <input type="range" class="w-full">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ادامه به مرحله بعد -->
+                <div class="text-center mt-4">
+                    <button id="continue-final" class="btn bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-8">
+                        ادامه به مرحله بعد
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- ارمان تموم -->
+    <div class="angled-line"></div>
+    
+    <div class="logo" id="logo">
+        <img src="asset/logo.png" alt="Wenodes logo">
+    </div>
+        
+    <!-- Footer Section -->
+    <div class="footer">
+        <p class="powered">Powered by <span class="wenodes">Wenodes</span>.</p>
+        <p class="sponsored">Sponsored by Dayhim Innovation Factory.</p>
+    </div>
+    
+
+
+
+  <!-- Prevent  pinch/gesture zoom   -->
+<script>
+    window.addEventListener('wheel', e => {if (e.ctrlKey) e.preventDefault();}, { passive: false });['gesturestart','gesturechange','gestureend'].forEach(evt =>document.addEventListener(evt, e => e.preventDefault(), { passive: false }));
+</script>
+
+</body>
+</html>

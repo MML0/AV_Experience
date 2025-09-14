@@ -1,0 +1,488 @@
+/* main.css */
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background-color: #0048a0;
+    /* background: conic-gradient(from 237.29deg at 74.94% 57.1%, #0048A0 0deg, #000000 229.21deg, #02002D 360deg);
+    filter: blur(21.6px);  */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow: hidden; /* Prevent scrollbars */
+}
+@font-face {
+    font-family: 'IRANSansXVF';
+    src: url('asset/fonts/IRANSansX-Regular.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'IRANSansXVF_Thin';
+    src: url('asset/fonts/IRANSansX-Thin.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+}
+.fade-in { opacity: 0; transform: translateY(8px); animation: fadeInUp .9s ease forwards; }
+.fade-out { opacity: 1; transform: translateY(8px); animation: fadeout .7s ease forwards; }
+.delay-1 { animation-delay: 1.0s; }
+.delay-2 { animation-delay: 1.2s; }
+.delay-3 { animation-delay: 1.4s; }
+.delay-4 { animation-delay: 1.6s; }
+
+.delay-2-1 { animation-delay: 0.2s; }
+.delay-2-2 { animation-delay: 0.4s; }
+.delay-2-3 { animation-delay: 0.6s; }
+.delay-2-4 { animation-delay: 0.8s; }
+
+
+@keyframes fadeInUp {
+from { opacity: 0; transform: translateY(8px); }
+to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeout {
+from { opacity: 1; transform: translateY(0); }
+to { opacity: 0; transform: translateY(8px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+.fade-in { animation: none; opacity: 1; transform: none; }
+}
+
+body, input, textarea, select, button, label, option {
+    font-family: 'IRANSansXVF', sans-serif;
+}
+
+
+
+/* Create the blurred background */
+.background_c {
+  position: fixed;          /* stays put */
+  inset: 0;
+  overflow: hidden;
+  z-index: 0;
+  background: #000;         /* prevents white bleed when blurring into transparency */
+  isolation: isolate;       /* keeps stacking sane across browsers */
+}
+
+/* the actual blurred gradient lives on ::before and is oversized */
+.background_c::before {
+  z-index: 0;
+
+  content: "";
+  position: absolute;
+  /* overscan ≈ 5× blur radius for Safari */
+  --blur: 20px;
+  --bleed: 120px;
+  inset: calc(-1 * var(--bleed));
+
+  /* your conic gradient (center can be tweaked) */
+  --cx: 60.94%;
+  --cy: 52.1%;
+    background: conic-gradient(
+    from var(--angle) at var(--cx) var(--cy),
+    #0048A0 0deg, #000000 229.21deg, #02002D 360deg);
+  /* background: conic-gradient(from 237.29deg at var(--cx) var(--cy),
+              #0048A0 0deg, #000000 229.21deg, #02002D 360deg); */
+  /* your sizing/positioning here */
+
+  /* zoom in so the visible area never reaches transparent edges */
+  transform: scale(1.25);
+  transform-origin: var(--cx) var(--cy);
+
+  filter: blur(var(--blur));
+  -webkit-filter: blur(var(--blur));   /* Safari */
+  will-change: transform, filter;
+}
+
+/* لوگو در حالت اولیه (stage-0) سمت چپ بالا */
+.logo {
+    display: flex;
+    position: absolute;
+    top: 100px;
+    left: 60px;
+    width: 114px;
+    height: 114px;
+    transform: none;
+    transform: translate(-50% , -50%);
+
+}
+
+.logo img {
+    width: 90px;
+    height: 90px;
+    margin: auto;
+}
+/* لوگو در stage 1 و 2 بالا و وسط صفحه */
+.logo.centered {
+    top: 100px; /* فاصله از بالا */
+    left: 50%; /* وسط افقی */
+    transform: translate(-50% , -50%);
+    width: 114px; /* اندازه اصلی */
+    height: 114px;
+}
+/* animate logo */
+
+#logo {
+    position: absolute;
+    top: 100px;
+    left: 100px;
+    transform: translate(-50%, -50%) !important;
+    transition: left 2400ms cubic-bezier(0.42, 0, 0.35, 0.99);
+    justify-content: center;
+    align-items: center;
+}
+#logo.at-50 {
+    top: 100px;
+    left: 50%;       
+    transform: translate(-50%, 0);
+}
+
+
+
+/* Footer Styles */
+.footer p{
+    margin: 1px;
+}
+.footer {
+    z-index: 1;
+    margin-top: auto;
+    text-align: center;
+    margin-bottom: 20px;
+    font-family: 'IRANSansXVF';
+    font-style: normal;
+    font-weight: 300;
+    font-size: 14px;
+    line-height: 21px;
+    /* identical to box height */
+    text-align: center;
+
+    color: #FFFFFF;
+}
+
+/* Powered by Wenodes - Bold */
+.powered {
+    color: #ffffff;
+    font-weight: normal;
+    font-size: 16px;
+}
+
+.wenodes {
+    font-weight: bold;
+    font-size: 17px;
+
+}
+
+/* Sponsored by Dayhim Innovation Factory - Thinner */
+.sponsored {
+    
+    font-weight: lighter;
+    color: #8E8E8E !important;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+.stage {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 2;  
+
+}
+
+.stage.active {
+    display: flex;
+}
+
+
+/* فیلدهای ورودی */
+.input {
+    background: rgba(0, 0, 0, 0.49);
+    color: white;
+    padding: 10px 10px;
+    width: 100%;
+    box-sizing: border-box;
+    font-family: 'IRANSansXVF', sans-serif;
+    font-size: 14px;
+    border: 1px solid #545454;
+    border-radius: 4px;
+}
+
+.w-full{
+    width: 100%;
+}
+#registration-form {
+    width: 90%;  /* طول فرم بیشتر شود */
+    max-width: 350px; /* روی موبایل محدود شود */
+    margin: 0 auto; /* وسط صفحه */
+}
+.registration_margin {
+    margin-bottom: 45px;
+    margin-right: 10px;
+    margin-left: 10px;
+
+}
+/* tablet/desktop registration form */
+@media (min-width: 750px) {
+  #registration-form {
+    border-radius: 10px;
+    padding: 24px 28px;        /* add padding only on larger screens */
+    box-shadow:
+      0 12px 30px rgba(157, 157, 157, 0.121),
+      0 12px 30px rgba(0,0,0,0.52),
+      0 0px 6px rgba(0,0,0,0.18);
+  }
+}
+.text-right{
+    direction: rtl;
+}
+/* دکمه ثبت اطلاعات */
+.btn-primary {
+    height: 60px;
+    background: #ffffff !important;  
+    color: rgb(0, 0, 0) !important;
+    border: none;
+    width: 100%;       /* هم‌عرض والد (مثل فیلدها) */
+    padding: 12px;     
+    border-radius: 4px;
+    text-align: center;
+    font-size: 16px;
+    font-family: 'IRANSansXVF', sans-serif; /* فونت مشابه */
+    box-sizing: border-box; /* تضمین هم‌عرضی */
+    display: block;
+}
+
+.btn-primary:hover {
+    background: #50545a;  
+    color: white;
+}
+
+
+.btn-primary:active {
+    background: #50545a; /* رنگی که بعد از کلیک میخوای */
+    color: white;         /* رنگ متن بعد از کلیک */
+}
+
+#registration-form label {
+    display: block;
+    text-align: right;    /* متن label سمت راست */
+    margin-bottom: 12px;   /* فاصله با input */
+    color: white;
+    font-family: 'IRANSansXVF', sans-serif;
+    font-size: 14px;
+    line-height: 1.2;
+}
+
+#registration-form div {
+    margin-bottom: 12px; /* فاصله بین هر فیلد */
+}
+
+
+.logo-morph-initial {
+    z-index: 5; /* پایین‌تر از فرم */
+}
+#stage-0 {
+    z-index: 10;
+}
+.form_main_lable{
+    direction: rtl;
+    font-size: 18px;
+    font-weight: 1000;
+    margin-bottom: 54px !important;
+    color: #FFFFFF;
+
+}
+
+#registration-form .btn-primary {
+    margin-top: 40px; /* فاصله دکمه از input آخر */
+}
+
+/* .custom-position {
+    position: absolute;
+    top: 120px;
+    left: 230px;
+    color: white;
+    font-size: 18px;
+    font-weight: 1000; 
+    font-family: 'IRANSansXVF', sans-serif;
+} */
+
+
+/* stage 1  */
+
+.text-center {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+
+}
+.card_stage_main{
+    height: 90vh;
+    padding-top: 140px;
+    padding-bottom: 50px;
+    margin-bottom: 20px;
+}
+.card_stage{
+    margin: auto 0;
+    padding-top: 20px;
+    padding: 18px;
+    max-width: 430px;
+    justify-content: center;
+    flex-direction: column;
+}
+#stage-1 h2 {
+    color: white;
+    text-align: right;
+    direction: rtl;
+    font-size: 20px;
+    font-family: 'IRANSansXVF', sans-serif;    
+}
+
+#stage-1 p {
+    color: white;
+    text-align: right;
+    direction: rtl;
+    font-family: 'IRANSansXVF_Thin', sans-serif;
+    
+
+}
+
+/* stage 1 text */
+
+#stage-1 {
+    position: relative;
+}
+
+.story-next-btn {
+    /* position: absolute;
+    bottom: 106px;   
+    right: 0;        
+    left: 0;             */
+    margin: 10px 0;
+    margin-bottom: 130px;
+    width: 90%;   
+    max-width: 400px;
+
+}
+
+
+
+/* line logine page between logo and text  وینازد و ... */
+.no-bold {
+  font-weight: normal !important;
+  color: #ffffffb3; /* همون سفیدی ملایم */
+  text-align: center;       /* راست‌چین */
+  margin: auto;
+
+}
+/* stage-2 text */
+
+/* stage 2 */
+#stage-2 {
+    position: relative;
+}
+
+#stage-2 h2 {
+    color: white;
+    text-align: right;
+    direction: rtl;
+    font-family: 'IRANSansXVF', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    margin: 13px 0;
+
+}
+
+#stage-2 p {
+    color: white;
+    text-align: right;
+    direction: rtl;
+    font-family: 'IRANSansXVF_Thin', sans-serif;
+    font-size: 16px;
+    font-weight: 300;
+    
+}
+
+/* دکمه ادامه در stage-2 */
+#stage-2 #story-next-2 {
+    /* margin: 10px 0;
+    margin-bottom: 130px;
+    width: 90%;   
+    max-width: 400px; */
+}
+.card_stage_2_main{
+    display: flex;
+    height: 95vh;
+    padding-top: 110px;
+    justify-content: space-around !important;
+}
+.card_stage_22{
+    /* width: 300px;  */
+    /* margin: 0 18px;
+    padding-top: 50px;
+    margin-bottom: 20px;
+    width: 90%;
+    max-width: 450px; */
+
+}
+
+
+
+.angled-line {
+    width: 80px;               /* طول خط */
+    height: 1px;               /* ضخامت خط */
+    /* background-color: white;   رنگ خط */
+    --c1: #ffffff00;
+    --c2: #FFFFFF42;
+    --c3: #FFFFFF42;
+    --c4: #FFFFFF42;
+    --c5: #adffff61;
+    background: linear-gradient(to right, var(--c1), var(--c2), var(--c3), var(--c4), var(--c5));
+    
+    transform: rotate(135deg) translateX(-50%) translateY(-50%);
+    transform-origin: center;
+
+    transform-origin: top left; 
+    position: absolute;        
+    top: 130px;                
+    left: 40%;              
+    z-index: 2;
+    transition: opacity 800ms ease;
+}
+.angled-line.fade-out_line{
+    opacity: 0;
+}
+.footer {
+    position: fixed;   /* همیشه پایین صفحه */
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    font-family: 'IRANSansXVF', sans-serif;
+    color: #FFFFFF !important;
+    z-index: 1000;    /* روی بقیه عناصر */
+    background: transparent; /* بدون پس‌زمینه */
+    padding: 4px 0;   /* فاصله بالا و پایین */
+}
+
+.footer .powered {
+    font-weight: 100 !important;
+    font-size: 16px;
+    margin: 0;
+}
+
+.footer .wenodes {
+    font-weight: 800 !important; /* کلمه Wenodes بولد */
+}
+
+.footer .sponsored {
+    font-weight: 100 !important;
+    font-size: 12px;
+    color: #8E8E8E !important;
+    margin: 2px 0 0 0; /* فاصله 2px از بالایی */
+}
+
