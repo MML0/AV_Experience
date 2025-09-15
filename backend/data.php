@@ -62,8 +62,8 @@ switch ($_SERVER['REQUEST_METHOD']) {
             }
 
             // Generate a random user_id using uniqid() with username for uniqueness
-            $userId = uniqid($name . "_", true); // Generates a unique ID based on username (prepend name for uniqueness)
-
+            $userId = uniqid(true); // Generates a unique ID based on username (prepend name for uniqueness)
+            $userId =  bin2hex(random_bytes(16));
             try {
                 // Prepare the upsert query (insert or update based on unique constraint)
                 $stmt = $pdo->prepare("

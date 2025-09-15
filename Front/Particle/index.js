@@ -115,7 +115,7 @@ let webCam;
 let particles;
 let material; // declare globally
 
-window.addEventListener('load', init);
+window.addEventListener('load', () => setTimeout(init, 2000));
 window.addEventListener('resize', onResize);
 
 function init() {
