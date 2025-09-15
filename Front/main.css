@@ -35,8 +35,13 @@ body, html {
 .delay-2-2 { animation-delay: 0.4s; }
 .delay-2-3 { animation-delay: 0.6s; }
 .delay-2-4 { animation-delay: 0.8s; }
-
-
+@keyframes glow{
+  0%,100% { filter: drop-shadow(0 0 0 rgba(255,255,255,.0)); }
+  50%     { filter: drop-shadow(0 0 8px rgba(255,255,255,.25)); }
+}
+.pulse-glow{
+  animation:  glow 1.8s ease-in-out infinite;
+}
 @keyframes fadeInUp {
 from { opacity: 0; transform: translateY(8px); }
 to   { opacity: 1; transform: translateY(0); }
@@ -322,7 +327,7 @@ body, input, textarea, select, button, label, option {
 }
 .card_stage_main{
     height: 90vh;
-    padding-top: 140px;
+    padding-top: 180px;
     padding-bottom: 50px;
     margin-bottom: 20px;
 }
@@ -484,5 +489,159 @@ body, input, textarea, select, button, label, option {
     font-size: 12px;
     color: #8E8E8E !important;
     margin: 2px 0 0 0; /* فاصله 2px از بالایی */
+}
+
+
+
+.main_menu_container{
+    width: 100%;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 120px;
+    background-color: #43389e60;
+    min-height: 100px;
+    max-height: 200px;
+    height: 11vh;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    flex-direction: row-reverse;
+    z-index: 3;
+}
+path {
+    fill: rgb(255, 255, 255);
+}
+.menu_btn{
+    display: flex;
+    margin: 0 auto;
+    width: 64px;
+    height: 64px;
+    border: 2px solid #808080;
+    border-radius: 4px;
+    justify-content: center;
+    align-items: center;
+    background-color: #000;
+}
+
+.footer{
+    display: none;
+}
+.photo_menu_btn{
+    margin: 0 auto;
+    width: 64px;
+    height: 64px;
+    background: #284FA2;
+    border: 2px solid #808080;
+    box-shadow: 0px 0px 14px #4B84FF;
+    border-radius: 4px;
+}
+.menu_btn_side_hover path {
+    fill: #000 !important;
+    stroke: rgb(0, 0, 0) !important;
+}
+.menu_btn_side_hover{
+    background-color: #ffffff;
+}
+
+
+
+
+
+.effects-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  backdrop-filter: blur(4px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 220ms ease;
+  z-index: 1000;
+}
+.effects-overlay.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* پنل */
+.effects-panel {
+  position: fixed;
+  left: 0;
+  bottom: -100vh;
+  width: 100vw;
+  height: 50vh;
+  max-height: 80vh;
+  background: rgba(0,0,0,0.82);
+  backdrop-filter: blur(10px);
+  color: white;
+  padding: 1rem;
+  border-top-left-radius: 2px;
+  border-top-right-radius: 2px;
+  box-shadow: 0 -12px 40px rgba(0,0,0,0.55);
+  z-index: 2;
+  box-sizing: border-box;
+  transform: none;
+
+  /* خط سفید بالای پنل */
+  border-top: 1px solid white; /* ضخامت ۲px و رنگ سفید */
+}
+
+
+
+/* فعال کردن transition */
+.effects-panel.animating {
+  transition: bottom 360ms cubic-bezier(.22,.9,.37,1);
+}
+
+/* text انتخاب موزیک پنل */
+.left-align {
+    text-align: right;
+    margin-left: 0;
+    padding-left: 0;
+}
+
+
+/* دکمه‌های ژانر */
+.genre-btn { 
+  background: transparent;
+  color: white;
+  border: 1px solid rgba(255,255,255,0.12);
+  padding: .6rem .5rem;
+  border-radius: 8px;
+  cursor: pointer;
+
+  display: flex;           /* دکمه‌ها flex باشن */
+  justify-content: flex-start; /* محتوا به سمت چپ */
+  text-align: left;        /* متن راست‌چین نباشه */
+  padding-left: 1rem; 
+}
+
+#effects-panel .flex.flex-col {
+  display: flex;            /* حتما flex باشه */
+  flex-direction: column;   /* ستون عمودی */
+  gap: 20px;                 /* فاصله ۵ پیکسل */
+}
+
+
+
+.genre-btn.active {
+  background: white;
+  color: black;
+  border-color: rgba(0,0,0,0.12);
+}
+
+/* دکمه SVG بستن */
+.close-svg-btn {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  z-index: 1002;
+}
+.close-svg-btn svg path {
+  stroke: white;
 }
 

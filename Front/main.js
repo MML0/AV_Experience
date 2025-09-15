@@ -1,4 +1,5 @@
 const db_url = 'http://127.0.0.1:3000/backend/data.php';
+const iframe_url = 'http://127.0.0.1:5501/Front/Particle/index.html';
 function fadeOutAndRemove(el, duration = 800) {
     requestAnimationFrame(() => document.getElementById('logo').classList.add('at-50'));
   if (!el) return;
@@ -35,13 +36,33 @@ function showStage(stageNumber) {
         logo.style.left = '50%';
         logo.style.opacity = 1;
         logo.classList.add('fade-in');
+        document.querySelector('#logo img').classList.add('pulse-glow');   
         
+        const iframe = document.getElementById('particleFrame');
+        iframe.src = iframe_url;
         setTimeout(() => {
-            const iframe = document.getElementById('particleFrame');
-            if (!iframe.dataset.loaded) {
-                iframe.src = iframe.dataset.src;
-            }
-        }, 500);
+            document.querySelectorAll('.stage').forEach(stage => stage.classList.remove('active'));
+            const current = document.getElementById(`stage-${stageNumber}`);
+            if (current) current.classList.add('active');
+
+            const footer = document.querySelector('.footer');
+            const sponsored = document.querySelector('.sponsored');
+            // footer.style.removeProperty('bottom');
+            footer.style.setProperty('bottom', 'auto', 'important');
+            footer.style.setProperty('top', '20px', 'important');
+            // footer.style.setProperty('font', '20px', 'important');
+            sponsored.style.setProperty('display', 'none', 'important');
+
+            footer.querySelectorAll('.wenodes').forEach(el => {
+            el.style.setProperty('font-weight', '100', 'important');})
+            footer.querySelectorAll('p').forEach(p => {
+                p.style.setProperty('font-size', '11px', 'important'); // pick any size you like
+            });
+            footer.querySelectorAll('span').forEach(p => {
+                p.style.setProperty('font-size', '13px', 'important'); // pick any size you like
+            });
+            logo.style.display = 'none'
+        }, 4000);
         return
         // startCamera();  
 
@@ -77,7 +98,19 @@ function getCookie(name) {
 }
 window.onload = function() {
     const userId = getCookie('user_id');
+    // armaan menu
+    const musicBtn = document.getElementById('music-btn');
+    const overlay = document.getElementById('effects-overlay');
+    const panel = document.getElementById('effects-panel');
+    const genres = document.querySelectorAll('.genre-btn');
         
+    let isOpen = false;
+    let startBottom = null;
+    const closeBtnSvg = document.getElementById('close-effects-svg');
+    closeBtnSvg.addEventListener('click', closePanel);
+
+    // armaan menu
+
     if (userId) {
         console.log(userId);
         // Fade out and remove the line (UI transition)
@@ -172,6 +205,115 @@ document.getElementById('story-next-2')?.addEventListener('click', function(e){
     showStage(3);
 });
 
+const buttons = document.querySelectorAll('.menu_btn');
+document.addEventListener('click', () => {
+//   buttons.forEach(b => b.classList.remove('menu_btn_side_hover'));
+});
+
+// select all buttons with class menu_btn
+document.querySelectorAll('.menu_btn').forEach(btn => {
+  btn.addEventListener('click', e => {
+     document.querySelectorAll('.menu_btn').forEach(b => {
+      b.classList.remove('menu_btn_side_hover');
+    });
+    const clicked = e.currentTarget;
+    
+    //  close music selection menu
+    if (isOpen) closePanel(musicBtn);
+
+    // add class only if it's not the photo button
+    if (clicked.id !== 'photo-btn') {
+        clicked.classList.add('menu_btn_side_hover');
+    }
+    switch (e.currentTarget.id) {
+      case 'menu-btn':
+        console.log('Menu button clicked');
+        // do something
+        break;
+
+      case 'camera-rotate-btn':
+        console.log('Camera rotate clicked');
+        // do something else
+        break;
+
+      case 'photo-btn':
+        console.log('Photo clicked');
+        // do something else
+        break;
+
+      case 'video-effect-btn':
+        console.log('Video effect clicked');
+        // do something else
+        break;
+
+      case 'music-btn':
+        console.log('Music clicked');
+        if (!isOpen) openPanelFromButton(musicBtn);
+        else closePanel();
+        break;
+
+      default:
+        console.log('Unknown button');
+    }
+  });
+});
+
+function openPanelFromButton(btn) {
+  const rect = btn.getBoundingClientRect();
+  const viewportH = window.innerHeight || document.documentElement.clientHeight;
+  startBottom = Math.max(0, Math.round(viewportH - rect.top));
+  panel.style.bottom = `${startBottom}px`;
+
+//   overlay.classList.add('show');
+//   overlay.setAttribute('aria-hidden', 'false');
+
+  panel.classList.add('animating');
+  void panel.offsetHeight; // force reflow
+  requestAnimationFrame(() => {
+    panel.style.bottom = `100px`;
+  });
+
+  function onEnd(e) {
+    if (e.propertyName !== 'bottom') return;
+    panel.classList.remove('animating');
+    panel.classList.add('open');
+    panel.style.bottom = '100px';
+    panel.removeEventListener('transitionend', onEnd);
+  }
+  panel.addEventListener('transitionend', onEnd);
+
+  isOpen = true;
+  musicBtn.setAttribute('aria-expanded', 'true');
+  panel.setAttribute('aria-hidden', 'false');
+}
+
+function closePanel() {
+  const ph = panel.offsetHeight || (window.innerHeight * 0.5);
+  panel.classList.add('animating');
+  panel.style.bottom = `-${ph}px`;
+
+//   overlay.classList.remove('show');
+//   overlay.setAttribute('aria-hidden', 'true');
+
+  function onCloseEnd(e) {
+    if (e.propertyName !== 'bottom') return;
+    panel.classList.remove('animating');
+    panel.classList.remove('open');
+    panel.style.bottom = '';
+    panel.removeEventListener('transitionend', onCloseEnd);
+  }
+  panel.addEventListener('transitionend', onCloseEnd);
+
+  isOpen = false;
+  musicBtn.setAttribute('aria-expanded', 'false');
+  panel.setAttribute('aria-hidden', 'true');
+}
+genres.forEach(btn => {
+  btn.addEventListener('click', () => {
+    genres.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  });
+});
 
 };
 
