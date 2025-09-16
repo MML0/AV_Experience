@@ -501,13 +501,15 @@ body, input, textarea, select, button, label, option {
     height: 120px;
     background-color: #43389e60;
     min-height: 100px;
-    max-height: 200px;
+    max-height: 110px;
     height: 11vh;
     display: flex;
     justify-content: space-around;
     align-items: center;
     flex-direction: row-reverse;
     z-index: 3;
+    background: rgba(0, 0, 0, 0.811);
+    backdrop-filter: blur(10px);
 }
 path {
     fill: rgb(255, 255, 255);
@@ -569,14 +571,13 @@ path {
   left: 0;
   bottom: -100vh;
   width: 100vw;
-  height: 50vh;
+  height: 340px;
   max-height: 80vh;
   background: rgba(0,0,0,0.82);
   backdrop-filter: blur(10px);
   color: white;
   padding: 1rem;
-  border-top-left-radius: 2px;
-  border-top-right-radius: 2px;
+
   box-shadow: 0 -12px 40px rgba(0,0,0,0.55);
   z-index: 2;
   box-sizing: border-box;
@@ -585,8 +586,9 @@ path {
   /* خط سفید بالای پنل */
   border-top: 1px solid white; /* ضخامت ۲px و رنگ سفید */
 }
-
-
+.input_range_div{
+    text-align: right;
+}
 
 /* فعال کردن transition */
 .effects-panel.animating {
@@ -625,8 +627,8 @@ path {
 
 
 .genre-btn.active {
-  background: white;
-  color: black;
+  background: #24468F;
+  color: rgb(255, 255, 255);
   border-color: rgba(0,0,0,0.12);
 }
 
@@ -645,3 +647,211 @@ path {
   stroke: white;
 }
 
+.menu_btn{
+    transition: transform 0.2s ease;
+}
+.menu_btn.animate {
+  transform: scale(0.9);
+  
+}
+#random_btn{
+    direction: rtl;  
+    color: #ffffff;
+    width: 100%;
+    height: 48px;
+    border: 1px solid #808080;
+    border-radius: 4px;
+    margin: 10px 0;
+    background-color: #00000090;
+    transition: transform 0.2s ease;
+}
+.h3_text_effects{
+    margin: 15px 0;
+    margin-top: -5px;
+}
+.div_inputs_effects label{
+    font-size: 14px;
+}
+
+#random_btn.animate {
+  transform: scale(0.95);
+  box-shadow: 0 0 8px rgba(40, 79, 162, 0.6);
+}
+.music_h3{
+    margin-top: 1px;
+}
+@media (min-width: 500px) {
+  .main_menu_container,#menu-panel, #effects-panel ,#video-panel {
+    border-radius: 10px 10px 0px 0px;
+    width: 500px;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}
+
+
+
+
+
+
+
+
+
+
+.panel-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  backdrop-filter: blur(4px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  z-index: 999;
+}
+.panel-overlay.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.panel {
+  position: fixed;
+  left: 0;
+  bottom: -100vh;
+  width: 100%;
+  height: 580px;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(10px);
+  color: white;
+
+  box-shadow: 0 -4px 30px rgba(0,0,0,0.5);
+  transition: bottom 0.3s ease ,height 0.3s ease;
+  z-index: 2;
+}
+.panel.show {
+  bottom: 20px;
+}
+
+.close-btn {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+
+
+
+/* پنل منووو گالریی */
+.button-group {
+    position: absolute;
+    bottom: 70px;
+    left: 50%; /* وسط افقی */
+    transform: translate(-50% , -50%);
+    display: flex;           /* کنار هم بچین */
+    justify-content: center; /* وسط‌چین بشن */
+    gap: 20px;                /* فاصله ۶ پیکسل بین دکمه‌ها */
+}
+
+.gallery-btn {
+  display: flex;            /* متن و آیکون کنار هم */
+  align-items: center;      /* وسط چین عمودی */
+  gap: 6px;                 /* فاصله بین آیکون و متن */
+  padding: 8px 12px;
+  background: #272727;
+  color: white;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.gallery-btn:hover {
+  background-color: #ff8533;
+  transform: scale(1.05);
+}
+
+.gallery-btn svg {
+  display: inline-block;
+  width: 25px;
+  height: 24px;
+  fill: currentColor; /* رنگ SVG هم‌رنگ متن */
+}
+
+
+
+
+
+
+
+
+
+
+.avamel-list img{
+    width: 50px;
+    height: 50px;
+    margin-bottom: -20px;
+    margin-top: 20px;
+    margin-left: 10px;
+    margin-right: 15px;
+}
+.avamel-list span{
+    font-size: 14px;
+}
+.avamel-list h3{
+    margin-top: 30px;
+    margin-right: 10px;
+    margin-bottom: 5px;
+    font-size: 17px;
+}
+.avamel-list {
+    text-decoration: ltr;
+    display: none; /* ابتدا مخفی */
+    /* position: absolute; موقعیت‌دهی مطلق نسبت به والد */
+    /* bottom: 100%; بالای دکمه */
+    right: 0;       /*فاصله از چپ والد */
+    margin-bottom: 20px; /* فاصله از دکمه */
+    /* background: rgba(0,0,0,0.8); پس‌زمینه دلخواه */
+    padding: 8px 12px;
+    border-radius: 4px;
+    z-index: 10; /* روی دکمه قرار بگیرد */
+    text-align: right; /* متن‌ها راست‌چین شوند */
+
+}
+
+.line_seprator{
+    width: 90%;
+    height: 1px;
+    background-color: #545454;
+    margin: 30px auto;
+}
+/* متن و خطوط داخل لیست */
+.avamel-list p {
+    margin: 15px 0;
+    color: #fff;
+}
+
+.avamel-list hr {
+    display: none; /* خط مخفی شود */
+}
+
+.avamel-list .top-line {
+    width: 450px; /* طول خط */
+    right: 10;
+    left: 10;
+    height: 1px;   /* ضخامت خط */
+    background-color: white;
+    margin-bottom: 6px; /* فاصله خط تا متن‌ها */
+}
+
+.avamel-list span {
+  display: inline-block;       /* کنار هم قرار گرفتن */
+  margin-left: 30px; 
+  margin-right: 15px; 
+
+  color: white;
+}

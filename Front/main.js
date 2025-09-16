@@ -1,5 +1,7 @@
 const db_url = 'http://127.0.0.1:3000/backend/data.php';
 const iframe_url = 'http://127.0.0.1:5501/Front/Particle/index.html';
+let isOpen = false;
+
 function fadeOutAndRemove(el, duration = 800) {
     requestAnimationFrame(() => document.getElementById('logo').classList.add('at-50'));
   if (!el) return;
@@ -9,7 +11,57 @@ function fadeOutAndRemove(el, duration = 800) {
   // once the fade finishes, remove from DOM
   el.addEventListener('transitionend', () => el.remove(), { once: true });
 }
+const updateIframe = () => {
+    const heightValue = heightSlider.value;
+    const thresholdValue = thresholdSlider.value;
+    const noiseAmountValue = noiseAmountSlider.value;
 
+    // Send data to the iframe
+    const iframe = document.getElementById('particleFrame');
+    iframe.contentWindow.postMessage({ type: 'setHeight', value: heightValue }, '*');
+    iframe.contentWindow.postMessage({ type: 'setThreshold', value: thresholdValue }, '*');
+    iframe.contentWindow.postMessage({ type: 'setNoiseAmount', value: noiseAmountValue }, '*'); // Set noise amount
+
+};
+function animateController(slider, startValue, endValue, duration, delay = 0) {
+    const startTime = performance.now() + delay;  // Add delay to the start time
+    const easeOutQuad = (t) => t * (2 - t); // Easing function for smooth transition
+
+    function animate() {
+        const elapsedTime = performance.now() - startTime;
+        const progress = Math.min(elapsedTime / duration, 1); // Ensure the progress doesn't go beyond 1
+
+        // Calculate the current value with easing
+        const easedProgress = easeOutQuad(progress);
+        const currentValue = startValue + (endValue - startValue) * easedProgress;
+
+        slider.value = currentValue.toFixed(2); // Set the slider value
+        updateIframe(); // Update the iframe with the new value
+
+        if (progress < 1) {
+            requestAnimationFrame(animate);
+        }
+    }
+
+    animate(); // Start the animation
+}
+function randomizeSliders() {
+    // Random target values for sliders
+    const heightSlider = document.getElementById("heightSlider");
+    const thresholdSlider = document.getElementById("thresholdSlider");
+    const noiseAmountSlider = document.getElementById("noiseAmountSlider");
+
+
+    const heightRandom = (Math.random()-0.5) * 20;
+    const thresholdRandom = (Math.random()+0.2)/1.2; // Between 0 and 1
+    const noiseRandom = (Math.random())*0.9; // Between 0 and 1
+
+    // Animate sliders to new random values
+    animateController(heightSlider, parseFloat(heightSlider.value), heightRandom, 1000);
+    animateController(thresholdSlider, parseFloat(thresholdSlider.value), thresholdRandom, 1000);
+    animateController(noiseAmountSlider, parseFloat(noiseAmountSlider.value), noiseRandom, 1000);
+
+}
 // تابع نمایش Stage
 function showStage(stageNumber) {
     document.querySelectorAll('.btn').forEach(btn => btn.disabled = true);
@@ -97,6 +149,15 @@ function getCookie(name) {
     return null;
 }
 window.onload = function() {
+    const menuPanel = document.getElementById("menu-panel");
+    const closeMenu = document.getElementById("close-menu");
+
+    const heightSlider = document.getElementById("heightSlider");
+    const thresholdSlider = document.getElementById("thresholdSlider");
+    // const downloadButton = document.getElementById("downloadButton");
+    // const audioPlayer = document.getElementById("audioPlayer");
+    const noiseAmountSlider = document.getElementById("noiseAmountSlider");
+
     const userId = getCookie('user_id');
     // armaan menu
     const musicBtn = document.getElementById('music-btn');
@@ -104,7 +165,6 @@ window.onload = function() {
     const panel = document.getElementById('effects-panel');
     const genres = document.querySelectorAll('.genre-btn');
         
-    let isOpen = false;
     let startBottom = null;
     const closeBtnSvg = document.getElementById('close-effects-svg');
     closeBtnSvg.addEventListener('click', closePanel);
@@ -212,48 +272,79 @@ document.addEventListener('click', () => {
 
 // select all buttons with class menu_btn
 document.querySelectorAll('.menu_btn').forEach(btn => {
-  btn.addEventListener('click', e => {
-     document.querySelectorAll('.menu_btn').forEach(b => {
-      b.classList.remove('menu_btn_side_hover');
+    btn.addEventListener('click', e => {
+        document.querySelectorAll('.menu_btn').forEach(b => {
+        b.classList.remove('menu_btn_side_hover');
     });
     const clicked = e.currentTarget;
-    
+
     //  close music selection menu
-    if (isOpen) closePanel(musicBtn);
 
     // add class only if it's not the photo button
-    if (clicked.id !== 'photo-btn') {
+    if (clicked.id !== 'photo-btn' && clicked.id !== 'camera-rotate-btn') {
         clicked.classList.add('menu_btn_side_hover');
     }
     switch (e.currentTarget.id) {
-      case 'menu-btn':
-        console.log('Menu button clicked');
-        // do something
-        break;
+        case 'menu-btn':
+            // close effects tab  if open
+            if (videoOpen) closeVideoPanel();
 
-      case 'camera-rotate-btn':
-        console.log('Camera rotate clicked');
-        // do something else
-        break;
+            // close music if open
+            if (isOpen) closePanel();
 
-      case 'photo-btn':
-        console.log('Photo clicked');
-        // do something else
-        break;
+            console.log('Menu button clicked');
+            menuPanel.classList.toggle("show");
 
-      case 'video-effect-btn':
-        console.log('Video effect clicked');
-        // do something else
-        break;
+            // do something
+            break;
 
-      case 'music-btn':
-        console.log('Music clicked');
-        if (!isOpen) openPanelFromButton(musicBtn);
-        else closePanel();
-        break;
+        case 'camera-rotate-btn':
+            // close music if open
+            if (isOpen) closePanel();
 
-      default:
-        console.log('Unknown button');
+            console.log('Camera rotate clicked');
+            const rotateBtn = document.getElementById('camera-rotate-btn');
+            rotateBtn.classList.add('animate');
+            // remove after animation ends so it can be reused
+            setTimeout(() => {
+                rotateBtn.classList.remove('animate');
+            }, 200); // match transition time
+            // do something else
+            break;
+
+        case 'photo-btn':
+            const photoBtn = document.getElementById('photo-btn');
+            console.log('Photo clicked');
+            photoBtn.classList.add('animate');
+
+            // remove after animation ends so it can be reused
+            setTimeout(() => {
+                photoBtn.classList.remove('animate');
+            }, 200); // match transition time
+            // do something else
+            break;
+
+        case 'video-effect-btn':
+            menuPanel.classList.remove("show");
+            // close music if open
+            if (isOpen) closePanel();
+            if (!videoOpen) openVideoPanel();
+            else closeVideoPanel();
+            console.log('Video effect clicked');
+            // do something else
+            break;
+        // music select   
+        case 'music-btn':
+            menuPanel.classList.remove("show");
+            // close effects tab  if open
+            if (videoOpen) closeVideoPanel();
+            console.log('Music clicked'.isOpen);
+            if (!isOpen) openPanelFromButton(musicBtn);
+            else closePanel();
+            break;
+
+        default:
+            console.log('Unknown button');
     }
   });
 });
@@ -270,14 +361,14 @@ function openPanelFromButton(btn) {
   panel.classList.add('animating');
   void panel.offsetHeight; // force reflow
   requestAnimationFrame(() => {
-    panel.style.bottom = `100px`;
+    panel.style.bottom = `80px`;
   });
 
   function onEnd(e) {
     if (e.propertyName !== 'bottom') return;
     panel.classList.remove('animating');
     panel.classList.add('open');
-    panel.style.bottom = '100px';
+    panel.style.bottom = '80px';
     panel.removeEventListener('transitionend', onEnd);
   }
   panel.addEventListener('transitionend', onEnd);
@@ -313,6 +404,80 @@ genres.forEach(btn => {
     genres.forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
   });
+});
+
+
+const videoBtn = document.getElementById('video-effect-btn');
+const videoPanel = document.getElementById('video-panel');
+const closeVideoBtn = document.getElementById('close-video-panel');
+
+let videoOpen = false;
+
+function openVideoPanel() {
+  videoPanel.style.bottom = '-100vh';
+  videoPanel.classList.add('animating');
+  void videoPanel.offsetHeight;
+  requestAnimationFrame(() => {
+    videoPanel.style.bottom = '50px';
+  });
+  videoPanel.addEventListener('transitionend', function onEnd(e) {
+    if (e.propertyName !== 'bottom') return;
+    videoPanel.classList.add('animating');
+    videoPanel.style.bottom = '-100vh';
+    void videoPanel.offsetHeight;
+    videoPanel.style.bottom = '50px';
+    videoPanel.removeEventListener('transitionend', onEnd);
+  });
+  videoPanel.setAttribute('aria-hidden', 'false');
+  videoOpen = true;
+}
+
+function closeVideoPanel() {
+  const ph = videoPanel.offsetHeight || (window.innerHeight * 0.5);
+  videoPanel.classList.add('animating');
+  videoPanel.style.bottom = `-${ph}px`;
+  videoPanel.addEventListener('transitionend', function onCloseEnd(e) {
+    if (e.propertyName !== 'bottom') return;
+    videoPanel.classList.remove('animating');
+    videoPanel.classList.remove('open');
+    videoPanel.style.bottom = '';
+    videoPanel.setAttribute('aria-hidden', 'true');
+    videoPanel.removeEventListener('transitionend', onCloseEnd);
+  });
+  videoOpen = false;
+}
+
+closeMenu.addEventListener("click", () => {
+    document.querySelectorAll('.menu_btn').forEach(b => {
+      b.classList.remove('menu_btn_side_hover');
+    });
+  menuPanel.classList.remove("show");
+});
+closeVideoBtn.addEventListener('click',closeVideoPanel);
+
+
+const randomBtn = document.getElementById('random_btn');
+
+randomBtn.addEventListener('click', () => {
+    randomizeSliders()
+    randomBtn.classList.add('animate');
+
+    // remove after animation ends so it can be reused
+    setTimeout(() => {
+        randomBtn.classList.remove('animate');
+    }, 200); // match transition time
+});
+
+
+const avamelBtn = document.getElementById('avamel-btn');
+const avamelList = document.getElementById('avamel-list');
+
+avamelBtn.addEventListener('click', () => {
+    if (avamelList.style.display === 'block') {
+        avamelList.style.display = 'none';
+    } else {
+        avamelList.style.display = 'block';
+    }
 });
 
 };

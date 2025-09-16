@@ -117,15 +117,12 @@
 
             </button>
 
-
-
             <!-- دکمه چرخش دوربین -->
             <button id="camera-rotate-btn" class="menu_btn ">
                 <svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M6.27 8.15989L9.88 8.79989H9.89L8.16 10.5299L3.35 9.67989L2.5 4.86989L4.23 3.14989L4.86 6.75989L5.98 5.63989C6.81424 4.80297 7.80547 4.13892 8.89685 3.68583C9.98823 3.23274 11.1583 2.99951 12.34 2.99951C13.5217 2.99951 14.6918 3.23274 15.7832 3.68583C16.8745 4.13892 17.8658 4.80297 18.7 5.63989C18.7393 5.68056 18.776 5.72222 18.81 5.76489C18.844 5.80822 18.8807 5.84989 18.92 5.88989C19.07 6.04989 19.22 6.21989 19.36 6.38989C19.45 6.49989 19.54 6.61989 19.63 6.73989C19.79 6.95989 19.93 7.17989 20.07 7.40989L20.107 7.46689C20.129 7.49822 20.15 7.53256 20.17 7.56989C20.3546 7.89928 20.5182 8.23995 20.66 8.58989L20.68 8.63989C21.03 9.51989 21.24 10.4299 21.31 11.3599L19.27 11.0699C19.1684 10.3418 18.956 9.63363 18.64 8.96989L18.58 8.84989C18.4331 8.55858 18.266 8.2779 18.08 8.00989C18.0627 7.99056 18.046 7.96889 18.03 7.94489C17.8083 7.62086 17.5572 7.31791 17.28 7.03989C15.9683 5.72881 14.1896 4.99231 12.335 4.99231C10.4804 4.99231 8.70172 5.72881 7.39 7.03989L6.27 8.15989ZM16.52 13.4699L21.33 14.3199L21.34 14.3299L22.19 19.1399L20.46 20.8699L19.82 17.2599L18.7 18.3799C15.18 21.8899 9.48 21.8899 5.97 18.3799L5.73 18.1099C4.3409 16.6131 3.50474 14.6868 3.36 12.6499L5.4 12.9399C5.6 14.4099 6.26 15.8299 7.39 16.9599C7.62 17.1899 7.87 17.3999 8.12 17.5899C10.86 19.6599 14.78 19.4599 17.28 16.9599L18.4 15.8399L14.79 15.1999L16.52 13.4699Z" fill="white"/>
                 </svg>
             </button>
-
 
             <button id="photo-btn" class="menu_btn photo_menu_btn">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -151,24 +148,113 @@
                     </svg>
             </button>
         </div>
-
+        <!-- musics menu -->
         <div id="effects-panel" class="effects-panel" role="dialog" >
     
             
             <button id="close-effects-svg" class="close-svg-btn" >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M6 9L12 15L18 9" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <svg width="14" height="8" viewBox="0 0 14 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M1 1L7 7L13 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
             </button>
 
-            <h3 class="text-white text-lg font-semibold mb-4 left-align">انتخاب موزیک</h3>
+            <h3 class="text-white text-lg font-semibold mb-4 left-align music_h3">انتخاب موزیک</h3>
 
             <div class="flex flex-col gap-2">
                 <button class="btn btn-outline genre-btn w-full text-right">Techno | تکنو</button>
                 <button class="btn btn-outline genre-btn w-full text-right">Ambient | امبینت</button>
                 <button class="btn btn-outline genre-btn w-full text-right">Electronic | الکترونیک</button>
-            <button class="btn btn-outline genre-btn w-full text-right">House | هاوس</button>
+                <button class="btn btn-outline genre-btn w-full text-right">House | هاوس</button>
+            </div>
         </div>
+        <!-- effects menu -->
+        <div id="video-panel" class="effects-panel" aria-hidden="true">
+            <!-- دکمه بستن -->
+            <button id="close-video-panel" class="close-svg-btn" aria-label="بستن پنل">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 9L12 15L18 9" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </button>
+
+            <!-- محتوا پنل افکت -->
+            <h3 class="h3_text_effects text-white text-lg font-semibold mb-4 left-align">کنترل افکت‌ها</h3>
+            <div class="space-y-3 div_inputs_effects">
+                <div class="input_range_div">
+                    <label class="text-white text-sm block mb-2">مقیاس ارتفاع</label>
+                    <input id="heightSlider" type="range" class="w-full"  min="-10" max="10" step="0.02" value="0.1" >
+                </div>
+                <div class="input_range_div">
+                    <label class="text-white text-sm block mb-2">آستانه</label>
+                    <input id="thresholdSlider" type="range" class="w-full"  min="0" max="1" step="0.01" value="0.1" >
+                </div>
+                <div class="input_range_div">
+                    <label class="text-white text-sm block mb-2">نویز</label>
+                    <input id="noiseAmountSlider" type="range" class="w-full"  min="0" max="1" step="0.02" value="0.1" >
+                </div>
+                <button id="random_btn">
+                    تنظیم تصادفی (Randomize)
+                </button>
+            </div>
+        </div>
+
+    
+        <div id="menu-overlay" class="panel-overlay"></div>
+        <div id="menu-panel" class="panel">
+            <button id="close-menu" class="close-btn">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 9L12 15L18 9" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </button>
+            <div id="avamel-list" class="avamel-list">
+                <h3>عوامل</h3>
+
+                <span>قدرت گرفته از وی نادز</span>
+                <img src="asset/logo.png" alt="">
+                <br>
+
+                <span>اسپانسر شده توسط کارخانه نوآوری دیهیم</span>
+                <img src="asset/logo.png" alt="">
+
+                <br>
+                <div class="line_seprator"></div>
+                <h3>موزیسین ها</h3>
+                <br>
+                <span>نیما رمضان</span>
+                <span>مهرداد ویشکی</span>
+                <hr><br>
+                <span>ماکان اشگواری</span>
+                <span>آرش سعیدی</span>
+                <hr><br>
+                <span>امیر دارابی</span>
+                <br>
+                <span>روزبه فدوی</span>
+            </div>
+            <div class="button-group">
+                <button class="gallery-btn">
+                    <!-- آیکون گالری -->
+                    <svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M11.7 8.375L15.2 2.375C16.7167 2.775 18.0627 3.50833 19.238 4.575C20.4133 5.64167 21.2673 6.90833 21.8 8.375H11.7ZM8.92501 10.875L5.50001 4.875C6.40001 3.99167 7.44601 3.29167 8.63801 2.775C9.83001 2.25833 11.1173 2 12.5 2C12.7167 2 12.9667 2.01267 13.25 2.038C13.5333 2.06333 13.7917 2.09233 14.025 2.125L8.92501 10.875ZM2.82501 14.5C2.72501 14.1 2.64568 13.6917 2.58701 13.275C2.52834 12.8583 2.49934 12.4333 2.50001 12C2.50001 10.8167 2.69168 9.7 3.07501 8.65C3.45834 7.6 4.00001 6.64167 4.70001 5.775L9.75001 14.5H2.82501ZM9.82501 21.625C8.30834 21.225 6.95834 20.4917 5.77501 19.425C4.59168 18.3583 3.73334 17.0917 3.20001 15.625H13.275L9.82501 21.625ZM12.5 22C12.25 22 11.9957 21.9833 11.737 21.95C11.4783 21.9167 11.2327 21.8833 11 21.85L16.075 13.125L19.5 19.125C18.6 20.0083 17.5543 20.7083 16.363 21.225C15.1717 21.7417 13.884 22 12.5 22ZM20.3 18.225L15.25 9.5H22.175C22.275 9.9 22.3543 10.3083 22.413 10.725C22.4717 11.1417 22.5007 11.5667 22.5 12C22.5 13.1667 22.296 14.2833 21.888 15.35C21.48 16.4167 20.9507 17.375 20.3 18.225Z" fill="white"/>
+                    </svg>
+                    <!-- متن دکمه -->
+                    <span class="btn-text">گالری</span>
+                </button>
+                <button class="gallery-btn">
+                    <!-- آیکون هدیه -->
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" clip-rule="evenodd" d="M20 13V18C20 18.7956 19.6839 19.5587 19.1213 20.1213C18.5587 20.6839 17.7956 21 17 21H13V13H20ZM11 13V21H7C6.20435 21 5.44129 20.6839 4.87868 20.1213C4.31607 19.5587 4 18.7956 4 18V13H11ZM9 2C9.56748 1.99997 10.1285 2.12069 10.6457 2.35414C11.163 2.58758 11.6246 2.92842 12 3.354C12.3754 2.92842 12.837 2.58758 13.3543 2.35414C13.8715 2.12069 14.4325 1.99997 15 2H15.5C15.8978 2 16.2794 2.15804 16.5607 2.43934C16.842 2.72064 17 3.10218 17 3.5V4C17 4.729 16.805 5.412 16.465 6H19C19.5304 6 20.0391 6.21071 20.4142 6.58579C20.7893 6.96086 21 7.46957 21 8V10C21 10.364 20.903 10.706 20.732 11H13V8C13 7.73478 12.8946 7.48043 12.7071 7.29289C12.5196 7.10536 12.2652 7 12 7C11.7348 7 11.4804 7.10536 11.2929 7.29289C11.1054 7.48043 11 7.73478 11 8V11H3.268C3.09245 10.696 3.00002 10.3511 3 10V8C3 7.46957 3.21071 6.96086 3.58579 6.58579C3.96086 6.21071 4.46957 6 5 6H7.535C7.18424 5.39184 6.99973 4.70206 7 4V3.5C7 3.10218 7.15804 2.72064 7.43934 2.43934C7.72064 2.15804 8.10218 2 8.5 2H9ZM9 4C9 4.53043 9.21071 5.03914 9.58579 5.41421C9.96086 5.78929 10.4696 6 11 6C11 5.46957 10.7893 4.96086 10.4142 4.58579C10.0391 4.21071 9.53043 4 9 4ZM15 4C14.4696 4 13.9609 4.21071 13.5858 4.58579C13.2107 4.96086 13 5.46957 13 6C13.5304 6 14.0391 5.78929 14.4142 5.41421C14.7893 5.03914 15 4.53043 15 4Z" fill="white"/>
+                    </svg>
+                    <span class="btn-text">هدیه</span>
+                </button>
+                <button class="gallery-btn" id="avamel-btn">
+                    <!-- آیکون عوامل -->
+                    <svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M16.5 11C18.16 11 19.49 9.66 19.49 8C19.49 6.34 18.16 5 16.5 5C14.84 5 13.5 6.34 13.5 8C13.5 9.66 14.84 11 16.5 11ZM8.5 11C10.16 11 11.49 9.66 11.49 8C11.49 6.34 10.16 5 8.5 5C6.84 5 5.5 6.34 5.5 8C5.5 9.66 6.84 11 8.5 11ZM8.5 13C6.17 13 1.5 14.17 1.5 16.5V18C1.5 18.55 1.95 19 2.5 19H14.5C15.05 19 15.5 18.55 15.5 18V16.5C15.5 14.17 10.83 13 8.5 13ZM16.5 13C16.21 13 15.88 13.02 15.53 13.05C15.55 13.06 15.56 13.08 15.57 13.09C16.71 13.92 17.5 15.03 17.5 16.5V18C17.5 18.35 17.43 18.69 17.32 19H22.5C23.05 19 23.5 18.55 23.5 18V16.5C23.5 14.17 18.83 13 16.5 13Z" fill="white"/>
+                    </svg>
+                    <span class="btn-text">عوامل</span>
+                </button>        
+            </div>
+        </div>
+    </div>
 
     </div>
 
