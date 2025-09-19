@@ -66,7 +66,7 @@ const CAMERA_FOV = 55;
 const LINE_THICKNESS = 2; // Note: not used without MeshLine
 const RENDER_MODE_COUNT = 4;
 const MODE_SWITCH_INTERVAL = 920000;
-const ORBIT_DAMPING = 0.05;
+const ORBIT_DAMPING = 0.08;
 const USE_TIME_UNIFORM = true;
 
 const isPhone = window.innerWidth < 1768; // simple check

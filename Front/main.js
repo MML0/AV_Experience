@@ -1,5 +1,9 @@
+
+// const db_url = 'https://www.mml-dev.ir/wenodes/backend/data.php';
+// const iframe_url = 'https://www.mml-dev.ir/wenodes/Particle';
+
 const db_url = 'http://127.0.0.1:3000/backend/data.php';
-const iframe_url = 'http://127.0.0.1:5501/Front/Particle/index.html';
+const iframe_url = 'http://127.0.0.1:5500/Front/Particle/index.html';
 let isOpen = false;
 
 function fadeOutAndRemove(el, duration = 800) {
@@ -22,6 +26,56 @@ const updateIframe = () => {
     iframe.contentWindow.postMessage({ type: 'setThreshold', value: thresholdValue }, '*');
     iframe.contentWindow.postMessage({ type: 'setNoiseAmount', value: noiseAmountValue }, '*'); // Set noise amount
 
+};
+const captureIframeFrame = () => {
+    const iframe = document.getElementById('particleFrame');
+    if (!iframe || !iframe.contentWindow) {
+        alert('Iframe not ready');
+        return;
+    }
+
+    // Listen for the captured frame
+    const onMsg = (ev) => {
+        if (ev.source !== iframe.contentWindow) return;
+        if (!ev.data || ev.data.type !== 'frame') return;
+
+        window.removeEventListener('message', onMsg);
+
+        const { dataUrl } = ev.data;
+        if (!dataUrl) {
+            alert('No image returned');
+            return;
+        }
+
+        // Download the image
+        const a = document.createElement('a');
+        a.href = dataUrl;
+        a.download = 'iframe-frame.png';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        const galleryDiv = document.querySelector('#galleryContent .main_gallery_img_div');
+        if (galleryDiv) {
+            const link = document.createElement('a');
+            link.href = dataUrl;
+            link.download = `capture-${Date.now()}.png`; // unique filename
+
+            const img = document.createElement('img');
+            img.src = dataUrl;
+            img.alt = 'Captured frame';
+
+            // Make image clickable (download on click)
+            link.appendChild(img);
+            galleryDiv.appendChild(link);
+        }
+
+    };
+
+    window.addEventListener('message', onMsg);
+
+    // Ask the iframe to capture its current frame
+    iframe.contentWindow.postMessage({ type: 'captureFrame' }, '*');
 };
 function animateController(slider, startValue, endValue, duration, delay = 0) {
     const startTime = performance.now() + delay;  // Add delay to the start time
@@ -92,7 +146,9 @@ function showStage(stageNumber) {
         
         const iframe = document.getElementById('particleFrame');
         iframe.src = iframe_url;
-        setTimeout(() => {
+        iframe.onload = () => {
+            console.log('iframe loaded');
+            
             document.querySelectorAll('.stage').forEach(stage => stage.classList.remove('active'));
             const current = document.getElementById(`stage-${stageNumber}`);
             if (current) current.classList.add('active');
@@ -114,7 +170,21 @@ function showStage(stageNumber) {
                 p.style.setProperty('font-size', '13px', 'important'); // pick any size you like
             });
             logo.style.display = 'none'
-        }, 4000);
+            setTimeout(() => {
+                // Animate height slider from 5 to 8 over 3 seconds
+                animateController(heightSlider, 0.1, 2, 3000);
+
+                // Animate threshold slider from 0.7 to 0.4 over 3 seconds
+                animateController(thresholdSlider, 0.1, 0.8, 2000);
+                // animateController(noiseAmountSlider, 0.1, 0.1, 100);
+
+                
+                const iframe = document.getElementById('particleFrame');
+
+                iframe.contentWindow.postMessage({ type: 'setNoiseAmount', value: 0.9 }, '*');
+
+            }, 4000);
+        };
         return
         // startCamera();  
 
@@ -154,10 +224,16 @@ window.onload = function() {
 
     const heightSlider = document.getElementById("heightSlider");
     const thresholdSlider = document.getElementById("thresholdSlider");
-    // const downloadButton = document.getElementById("downloadButton");
+    const downloadButton = document.getElementById("photo-btn");
     // const audioPlayer = document.getElementById("audioPlayer");
     const noiseAmountSlider = document.getElementById("noiseAmountSlider");
-
+    
+    downloadButton.addEventListener('click', captureIframeFrame);
+        
+    heightSlider.addEventListener('input', updateIframe);
+    thresholdSlider.addEventListener('input', updateIframe);
+    noiseAmountSlider.addEventListener('input', updateIframe);
+    
     const userId = getCookie('user_id');
     // armaan menu
     const musicBtn = document.getElementById('music-btn');
@@ -169,14 +245,16 @@ window.onload = function() {
     const closeBtnSvg = document.getElementById('close-effects-svg');
     closeBtnSvg.addEventListener('click', closePanel);
 
+
     // armaan menu
 
     if (userId) {
         console.log(userId);
         // Fade out and remove the line (UI transition)
-        // const line = document.querySelector('.angled-line');
-        // fadeOutAndRemove(line, 800); // duration in ms
-        // showStage(1);
+        showToast('logged in', { duration: 800 });
+        const line = document.querySelector('.angled-line');
+        fadeOutAndRemove(line, 800); // duration in ms
+        showStage(1);
     } else {
         console.log('No user_id found in the cookie');
     }
@@ -256,155 +334,155 @@ window.onload = function() {
     });
 
 
-document.getElementById('story-next-1')?.addEventListener('click', function(e){
-    e.preventDefault();
-    showStage(2);
-});
-document.getElementById('story-next-2')?.addEventListener('click', function(e){
-    e.preventDefault();
-    showStage(3);
-});
-
-const buttons = document.querySelectorAll('.menu_btn');
-document.addEventListener('click', () => {
-//   buttons.forEach(b => b.classList.remove('menu_btn_side_hover'));
-});
-
-// select all buttons with class menu_btn
-document.querySelectorAll('.menu_btn').forEach(btn => {
-    btn.addEventListener('click', e => {
-        document.querySelectorAll('.menu_btn').forEach(b => {
-        b.classList.remove('menu_btn_side_hover');
+    document.getElementById('story-next-1')?.addEventListener('click', function(e){
+        e.preventDefault();
+        showStage(2);
     });
-    const clicked = e.currentTarget;
+    document.getElementById('story-next-2')?.addEventListener('click', function(e){
+        e.preventDefault();
+        showStage(3);
+    });
 
-    //  close music selection menu
+    const buttons = document.querySelectorAll('.menu_btn');
+    document.addEventListener('click', () => {
+    //   buttons.forEach(b => b.classList.remove('menu_btn_side_hover'));
+    });
 
-    // add class only if it's not the photo button
-    if (clicked.id !== 'photo-btn' && clicked.id !== 'camera-rotate-btn') {
-        clicked.classList.add('menu_btn_side_hover');
+    // select all buttons with class menu_btn
+    document.querySelectorAll('.menu_btn').forEach(btn => {
+        btn.addEventListener('click', e => {
+            document.querySelectorAll('.menu_btn').forEach(b => {
+            b.classList.remove('menu_btn_side_hover');
+        });
+        const clicked = e.currentTarget;
+
+        //  close music selection menu
+
+        // add class only if it's not the photo button
+        if (clicked.id !== 'photo-btn' && clicked.id !== 'camera-rotate-btn') {
+            clicked.classList.add('menu_btn_side_hover');
+        }
+        switch (e.currentTarget.id) {
+            case 'menu-btn':
+                // close effects tab  if open
+                if (videoOpen) closeVideoPanel();
+
+                // close music if open
+                if (isOpen) closePanel();
+
+                console.log('Menu button clicked');
+                menuPanel.classList.toggle("show");
+
+                // do something
+                break;
+
+            case 'camera-rotate-btn':
+                // close music if open
+                if (isOpen) closePanel();
+
+                console.log('Camera rotate clicked');
+                const rotateBtn = document.getElementById('camera-rotate-btn');
+                rotateBtn.classList.add('animate');
+                // remove after animation ends so it can be reused
+                setTimeout(() => {
+                    rotateBtn.classList.remove('animate');
+                }, 200); // match transition time
+                // do something else
+                break;
+
+            case 'photo-btn':
+                const photoBtn = document.getElementById('photo-btn');
+                console.log('Photo clicked');
+                photoBtn.classList.add('animate');
+
+                // remove after animation ends so it can be reused
+                setTimeout(() => {
+                    photoBtn.classList.remove('animate');
+                }, 200); // match transition time
+                // do something else
+                break;
+
+            case 'video-effect-btn':
+                menuPanel.classList.remove("show");
+                // close music if open
+                if (isOpen) closePanel();
+                if (!videoOpen) openVideoPanel();
+                else closeVideoPanel();
+                console.log('Video effect clicked');
+                // do something else
+                break;
+            // music select   
+            case 'music-btn':
+                menuPanel.classList.remove("show");
+                // close effects tab  if open
+                if (videoOpen) closeVideoPanel();
+                console.log('Music clicked'.isOpen);
+                if (!isOpen) openPanelFromButton(musicBtn);
+                else closePanel();
+                break;
+
+            default:
+                console.log('Unknown button');
+        }
+    });
+    });
+
+    function openPanelFromButton(btn) {
+    const rect = btn.getBoundingClientRect();
+    const viewportH = window.innerHeight || document.documentElement.clientHeight;
+    startBottom = Math.max(0, Math.round(viewportH - rect.top));
+    panel.style.bottom = `${startBottom}px`;
+
+    //   overlay.classList.add('show');
+    //   overlay.setAttribute('aria-hidden', 'false');
+
+    panel.classList.add('animating');
+    void panel.offsetHeight; // force reflow
+    requestAnimationFrame(() => {
+        panel.style.bottom = `80px`;
+    });
+
+    function onEnd(e) {
+        if (e.propertyName !== 'bottom') return;
+        panel.classList.remove('animating');
+        panel.classList.add('open');
+        panel.style.bottom = '80px';
+        panel.removeEventListener('transitionend', onEnd);
     }
-    switch (e.currentTarget.id) {
-        case 'menu-btn':
-            // close effects tab  if open
-            if (videoOpen) closeVideoPanel();
+    panel.addEventListener('transitionend', onEnd);
 
-            // close music if open
-            if (isOpen) closePanel();
-
-            console.log('Menu button clicked');
-            menuPanel.classList.toggle("show");
-
-            // do something
-            break;
-
-        case 'camera-rotate-btn':
-            // close music if open
-            if (isOpen) closePanel();
-
-            console.log('Camera rotate clicked');
-            const rotateBtn = document.getElementById('camera-rotate-btn');
-            rotateBtn.classList.add('animate');
-            // remove after animation ends so it can be reused
-            setTimeout(() => {
-                rotateBtn.classList.remove('animate');
-            }, 200); // match transition time
-            // do something else
-            break;
-
-        case 'photo-btn':
-            const photoBtn = document.getElementById('photo-btn');
-            console.log('Photo clicked');
-            photoBtn.classList.add('animate');
-
-            // remove after animation ends so it can be reused
-            setTimeout(() => {
-                photoBtn.classList.remove('animate');
-            }, 200); // match transition time
-            // do something else
-            break;
-
-        case 'video-effect-btn':
-            menuPanel.classList.remove("show");
-            // close music if open
-            if (isOpen) closePanel();
-            if (!videoOpen) openVideoPanel();
-            else closeVideoPanel();
-            console.log('Video effect clicked');
-            // do something else
-            break;
-        // music select   
-        case 'music-btn':
-            menuPanel.classList.remove("show");
-            // close effects tab  if open
-            if (videoOpen) closeVideoPanel();
-            console.log('Music clicked'.isOpen);
-            if (!isOpen) openPanelFromButton(musicBtn);
-            else closePanel();
-            break;
-
-        default:
-            console.log('Unknown button');
+    isOpen = true;
+    musicBtn.setAttribute('aria-expanded', 'true');
+    panel.setAttribute('aria-hidden', 'false');
     }
-  });
-});
 
-function openPanelFromButton(btn) {
-  const rect = btn.getBoundingClientRect();
-  const viewportH = window.innerHeight || document.documentElement.clientHeight;
-  startBottom = Math.max(0, Math.round(viewportH - rect.top));
-  panel.style.bottom = `${startBottom}px`;
+    function closePanel() {
+    const ph = panel.offsetHeight || (window.innerHeight * 0.5);
+    panel.classList.add('animating');
+    panel.style.bottom = `-${ph}px`;
 
-//   overlay.classList.add('show');
-//   overlay.setAttribute('aria-hidden', 'false');
+    //   overlay.classList.remove('show');
+    //   overlay.setAttribute('aria-hidden', 'true');
 
-  panel.classList.add('animating');
-  void panel.offsetHeight; // force reflow
-  requestAnimationFrame(() => {
-    panel.style.bottom = `80px`;
-  });
+    function onCloseEnd(e) {
+        if (e.propertyName !== 'bottom') return;
+        panel.classList.remove('animating');
+        panel.classList.remove('open');
+        panel.style.bottom = '';
+        panel.removeEventListener('transitionend', onCloseEnd);
+    }
+    panel.addEventListener('transitionend', onCloseEnd);
 
-  function onEnd(e) {
-    if (e.propertyName !== 'bottom') return;
-    panel.classList.remove('animating');
-    panel.classList.add('open');
-    panel.style.bottom = '80px';
-    panel.removeEventListener('transitionend', onEnd);
-  }
-  panel.addEventListener('transitionend', onEnd);
-
-  isOpen = true;
-  musicBtn.setAttribute('aria-expanded', 'true');
-  panel.setAttribute('aria-hidden', 'false');
-}
-
-function closePanel() {
-  const ph = panel.offsetHeight || (window.innerHeight * 0.5);
-  panel.classList.add('animating');
-  panel.style.bottom = `-${ph}px`;
-
-//   overlay.classList.remove('show');
-//   overlay.setAttribute('aria-hidden', 'true');
-
-  function onCloseEnd(e) {
-    if (e.propertyName !== 'bottom') return;
-    panel.classList.remove('animating');
-    panel.classList.remove('open');
-    panel.style.bottom = '';
-    panel.removeEventListener('transitionend', onCloseEnd);
-  }
-  panel.addEventListener('transitionend', onCloseEnd);
-
-  isOpen = false;
-  musicBtn.setAttribute('aria-expanded', 'false');
-  panel.setAttribute('aria-hidden', 'true');
-}
-genres.forEach(btn => {
-  btn.addEventListener('click', () => {
-    genres.forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-  });
-});
+    isOpen = false;
+    musicBtn.setAttribute('aria-expanded', 'false');
+    panel.setAttribute('aria-hidden', 'true');
+    }
+    genres.forEach(btn => {
+    btn.addEventListener('click', () => {
+        genres.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+    });
+    });
 
 
 const videoBtn = document.getElementById('video-effect-btn');
@@ -508,6 +586,7 @@ galleryBtn.addEventListener('click', () => {
     galleryContent.style.display = 'block';
     giftContent.style.display = 'none';
     avamelList.style.display = 'none';
+    showToast('click to Download.', { duration: 1800 });
   }
 });
 
@@ -524,20 +603,40 @@ giftCopyBtn.addEventListener('click', async () => {
   showToast(ok ? 'Copied to clipboard' : 'Copy failed', { duration: 1800 });
 });
 
+
+
+
+
+// Function to close all divs in stage 3
+function closeAllDivsInStage3() {
+    const allDivs = document.querySelectorAll('#stage-3 .main_menu_container .menu_btn');
+    allDivs.forEach(div => {
+        div.classList.remove('active'); // Close all divs by removing 'active' class
+    });
+    console.log('Closed all divs in stage 3');
+}
+
+// Handle the Android back button press
+function handleBackButton(e) {
+    // If we're in stage 3, close all divs
+    const currentStage = document.getElementById('stage-3');
+    if (currentStage && currentStage.classList.contains('active')) {
+        e.preventDefault(); // Prevent default back behavior (going to previous page)
+        closeAllDivsInStage3(); // Close all divs in stage 3
+        lastStageOpened = null;
+        return; // Don't navigate back
+    }
+}
+
+// Add event listener for the back button press (Android)
+window.addEventListener('popstate', handleBackButton);
+
+// Push a new state to history to handle back navigation (works on Android browser)
+window.history.pushState(null, null, window.location.href); // Adds a new history entry
 };
 
-// setTimeout(() => {    
-//     const line = document.querySelector('.angled-line');
-//     fadeOutAndRemove(line, 800); // duration in ms
-// }, 2000);
 
-
-
-
-
-
-
-    // 1) Toast utility
+// Toast utility
 (function () {
   // ensure a single root
   function getToastRoot() {
@@ -585,7 +684,7 @@ giftCopyBtn.addEventListener('click', async () => {
   };
 })();
 
-// 2) Clipboard helper (modern API with fallback)
+// Clipboard helper (modern API with fallback)
 async function copyText(text) {
   try {
     if (navigator.clipboard && window.isSecureContext) {
