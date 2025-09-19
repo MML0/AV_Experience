@@ -855,3 +855,110 @@ path {
 
   color: white;
 }
+
+.gift_main_div{
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    align-items: flex-end;
+    margin: 10px;
+}
+.gift_card .line_seprator{
+    margin: 15px auto !important;
+}
+.gift_card h3{
+    margin: 14px;
+    font-size: 16px;
+}
+.gift_card{
+    background-color: #272727;
+    width: 90%;
+    margin: 10px auto;
+    padding: 10px;
+}
+.code_area{
+    direction: ltr;
+}
+#discountCode{
+    padding: 0px 18px;
+    gap: 10px;
+
+    width: auto;
+    height: 36px;
+    color: #ffffff;
+    background: #000000;
+    border: 1px solid #000000;
+    border-radius: 4px;
+}
+#copyBtn{
+    background-color: #808080;
+    box-sizing: border-box;
+
+    width: 36px;
+    height: 36px;
+
+    border: 1px solid #808080;
+    border-radius: 4px;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Toast container (fixed at bottom, centered) */
+#toast-root {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none; /* clicks pass through */
+}
+
+/* Single toast */
+.toast {
+  max-width: 90vw;
+  background: rgba(255, 255, 255, 0.98);
+  color: #222;
+  border: 1px solid rgba(0,0,0,0.15); /* gray border */
+  border-radius: 9999px;               /* super round */
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  padding: 12px 16px;
+  font: 500 14px/1.2 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 200ms ease, transform 200ms ease;
+}
+
+/* visible state */
+.toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* optional darker theme */
+.toast.dark {
+  background: rgba(32, 32, 32, 0.98);
+  color: #fff;
+  border-color: rgba(255,255,255,0.18);
+}

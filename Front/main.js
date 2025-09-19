@@ -477,7 +477,51 @@ avamelBtn.addEventListener('click', () => {
         avamelList.style.display = 'none';
     } else {
         avamelList.style.display = 'block';
+        galleryContent.style.display = 'none';
+        giftContent.style.display = 'none';
     }
+});
+
+// Gift toggle
+const giftBtn = document.getElementById('giftBtn');
+const giftContent = document.getElementById('giftContent');
+
+giftBtn.addEventListener('click', () => {
+  if (giftContent.style.display === 'block') {
+    giftContent.style.display = 'none';
+  } else {
+    giftContent.style.display = 'flex';
+    galleryContent.style.display = 'none';
+    avamelList.style.display = 'none';
+
+  }
+});
+
+// Gallery toggle
+const galleryBtn = document.getElementById('galleryBtn');
+const galleryContent = document.getElementById('galleryContent');
+
+galleryBtn.addEventListener('click', () => {
+  if (galleryContent.style.display === 'block') {
+    galleryContent.style.display = 'none';
+  } else {
+    galleryContent.style.display = 'block';
+    giftContent.style.display = 'none';
+    avamelList.style.display = 'none';
+  }
+});
+
+// Gift code copy
+const giftCopyBtn = document.getElementById('copyBtn');
+const giftCode = document.getElementById('discountCode');
+
+giftCode.addEventListener('click', () => {
+  giftCode.select();
+});
+
+giftCopyBtn.addEventListener('click', async () => {
+  const ok = await copyText(giftCode.value);
+  showToast(ok ? 'Copied to clipboard' : 'Copy failed', { duration: 1800 });
 });
 
 };
@@ -486,3 +530,80 @@ avamelBtn.addEventListener('click', () => {
 //     const line = document.querySelector('.angled-line');
 //     fadeOutAndRemove(line, 800); // duration in ms
 // }, 2000);
+
+
+
+
+
+
+
+    // 1) Toast utility
+(function () {
+  // ensure a single root
+  function getToastRoot() {
+    let root = document.getElementById('toast-root');
+    if (!root) {
+      root = document.createElement('div');
+      root.id = 'toast-root';
+      document.body.appendChild(root);
+    }
+    return root;
+  }
+
+  // Create and show a toast
+  window.showToast = function (message, {
+    duration = 2000,
+    dark = false,
+    id = null, // set to avoid duplicates if you want
+  } = {}) {
+    const root = getToastRoot();
+
+    // optional: prevent duplicate by id
+    if (id && root.querySelector(`.toast[data-id="${id}"]`)) {
+      return;
+    }
+
+    const el = document.createElement('div');
+    el.className = 'toast';
+    if (dark) el.classList.add('dark');
+    if (id) el.dataset.id = id;
+    el.textContent = message;
+
+    root.appendChild(el);
+
+    // fade in
+    requestAnimationFrame(() => el.classList.add('show'));
+
+    // fade out + remove
+    const hide = () => {
+      el.classList.remove('show');
+      setTimeout(() => el.remove(), 220);
+    };
+    setTimeout(hide, duration);
+
+    return el;
+  };
+})();
+
+// 2) Clipboard helper (modern API with fallback)
+async function copyText(text) {
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } else {
+      // fallback: temp input + execCommand
+      const tmp = document.createElement('textarea');
+      tmp.value = text;
+      tmp.style.position = 'fixed';
+      tmp.style.opacity = '0';
+      document.body.appendChild(tmp);
+      tmp.select();
+      document.execCommand('copy');
+      tmp.remove();
+      return true;
+    }
+  } catch (e) {
+    return false;
+  }
+}
