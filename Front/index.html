@@ -5,8 +5,8 @@
     <meta
     name="viewport"
     content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <link rel="stylesheet" href="main.css?v=0.2.9">
-    <script src="main.js?v=0.2.9" ></script>
+    <link rel="stylesheet" href="main.css?v=0.2.15">
+    <script src="main.js?v=0.2.16" ></script>
     <title>AV Experienc</title>
     <link rel="preload" as="font" href="asset/fonts/IRANSansX-Regular.otf" type="font/otf" crossorigin>
     <link rel="preload" as="font" href="asset/fonts/IRANSansX-Thin.otf" type="font/otf" crossorigin>
@@ -160,11 +160,11 @@
 
             <h3 class="text-white text-lg font-semibold mb-4 left-align music_h3">انتخاب موزیک</h3>
 
-            <div class="flex flex-col gap-2">
-                <button class="btn btn-outline genre-btn w-full text-right">Techno | تکنو</button>
-                <button class="btn btn-outline genre-btn w-full text-right">Ambient | امبینت</button>
-                <button class="btn btn-outline genre-btn w-full text-right">Electronic | الکترونیک</button>
-                <button class="btn btn-outline genre-btn w-full text-right">House | هاوس</button>
+            <div class="flex flex-col gap-2" id="genre-controls">
+                <button class="btn btn-outline genre-btn w-full text-right" data-genre="techno">ماکان اشکواری </button>
+                <button class="btn btn-outline genre-btn w-full text-right" data-genre="ambient">امیر دارابی </button>
+                <button class="btn btn-outline genre-btn w-full text-right" data-genre="electronic">نیما رمضان </button>
+                <button class="btn btn-outline genre-btn w-full text-right" data-genre="house">روزبه فدوی</button>
             </div>
         </div>
         <!-- effects menu -->
@@ -208,12 +208,12 @@
             <div id="avamel-list" class="avamel-list">
                 <h3>عوامل</h3>
 
-                <span>قدرت گرفته از وی نادز</span>
+                <span> پروژه تجربی از وینادز</span> 
                 <img src="asset/logo.png" alt="">
                 <br>
 
                 <span>اسپانسر شده توسط کارخانه نوآوری دیهیم</span>
-                <img src="asset/logo.png" alt="">
+                <img src="asset/dif-whit-sit-v1.png" alt="">
 
                 <br>
                 <div class="line_seprator"></div>
@@ -232,15 +232,20 @@
             <div class="gift_main_div" id="giftContent">
                 <h3>هدایا</h3>
                 <div class="gift_card text-right">
-                    <h3>کد تخفیف 50 درصدی تجربه صدا و تصویر</h3>
+                    <h3>کد تخفیف 20 درصدی تجربه صدا و تصویر</h3>
                     <div class="line_seprator"></div>
                     <ul>
-                        <li>اجراهای ۲۴ و ۲۵ شهریور</li>
+                        <li> اجراهای ۴ ، ۱۱ و ۱۸ مهر</li> 
                         <li>قابل استفاده برای یک نفر</li>
-                        <li>خرید از سایت tiwall.ir</li>
+                        <li>
+                            خرید از سایت 
+                            <a href="https://www.tiwall.com/p/vol04" target="_blank" rel="noopener noreferrer">
+                            tiwall.ir
+                            </a>
+                        </li>
                     </ul>
                     <div class="code_area">
-                        <input type="text" id="discountCode" value="SAVE20" readonly />
+                        <input type="text" id="discountCode" value="WENODES" readonly />
                         <button id="copyBtn">
                             <svg width="20px" height="20px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path fill-rule="evenodd" clip-rule="evenodd" d="M21 8C21 6.34315 19.6569 5 18 5H10C8.34315 5 7 6.34315 7 8V20C7 21.6569 8.34315 23 10 23H18C19.6569 23 21 21.6569 21 20V8ZM19 8C19 7.44772 18.5523 7 18 7H10C9.44772 7 9 7.44772 9 8V20C9 20.5523 9.44772 21 10 21H18C18.5523 21 19 20.5523 19 20V8Z" fill="#0F0F0F"/>
@@ -309,6 +314,13 @@
 <script>
     window.addEventListener('wheel', e => {if (e.ctrlKey) e.preventDefault();}, { passive: false });['gesturestart','gesturechange','gestureend'].forEach(evt =>document.addEventListener(evt, e => e.preventDefault(), { passive: false }));
 </script>
+  <span id="reactiveStatus" style="opacity:.0; display: none;">idle</span>
+
+<audio id="audio-techno" preload="auto" crossorigin="anonymous" playsinline></audio>
+<audio id="audio-ambient" preload="auto" crossorigin="anonymous" playsinline></audio>
+<audio id="audio-electronic" preload="auto" crossorigin="anonymous" playsinline></audio>
+<audio id="audio-house" preload="auto" crossorigin="anonymous" playsinline></audio>
+
 
 </body>
 </html>

@@ -1,5 +1,5 @@
 
-window.addEventListener("message", (event) => {
+window.addEventListener("message",async  (event) => {
   if (event.data.type === "setHeight") {
     PARTICLE_HEIGHT_SCALE = event.data.value;
     // console.log("Height scale set to:", PARTICLE_HEIGHT_SCALE);
@@ -20,6 +20,18 @@ window.addEventListener("message", (event) => {
       material.uniforms.noiseAmount.value = NOISE_AMOUNT;
       // console.log("Noise amount set to:", NOISE_AMOUNT);
     }
+  }
+
+  // ✅ new: camera switching
+  if (event.data.type === "setCamera") {
+    const v = String(event.data.value || '').toLowerCase();
+    const facing = (v === 'back' || v === 'environment') ? 'environment' : 'user';
+    if (facing !== currentFacingMode) await startCamera(facing);
+  }
+
+  if (event.data.type === "toggleCamera" || event.data.type === "rotateCamera") {
+    const next = currentFacingMode === 'user' ? 'environment' : 'user';
+    await startCamera(next);
   }
 
 
@@ -58,14 +70,14 @@ window.addEventListener('message', (e) => {
 
 
 let renderMode = 2;
-let NOISE_AMOUNT = 0.1; // Default noise amount
+let NOISE_AMOUNT = 0.2; // Default noise amount
 let PARTICLE_HEIGHT_SCALE = 0.1; // can now be changed live
 const PARTICLE_SPACING = 0.03;
 const PARTICLE_SIZE = 1.0;
 const CAMERA_FOV = 55;
 const LINE_THICKNESS = 2; // Note: not used without MeshLine
 const RENDER_MODE_COUNT = 4;
-const MODE_SWITCH_INTERVAL = 920000;
+const MODE_SWITCH_INTERVAL = 2020000;
 const ORBIT_DAMPING = 0.08;
 const USE_TIME_UNIFORM = true;
 
@@ -109,6 +121,9 @@ function updateFPS() {
 //=============================
 // 🎬 MAIN SETUP
 //=============================
+// --- add globals
+let currentFacingMode = 'user'; // 'user' (front) or 'environment' (back)
+let shouldMirror = currentFacingMode === 'user';
 
 let renderer, scene, camera;
 let webCam;
@@ -116,7 +131,204 @@ let particles;
 let material; // declare globally
 
 window.addEventListener('load', () => setTimeout(init, 2000));
-window.addEventListener('resize', onResize);
+// window.addEventListener('resize', onResize); 
+
+
+// =====================
+// Camera utils (add these once)
+// =====================
+let deviceCache = { user: null, environment: null };
+
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function stopCurrentStream() {
+  try {
+    if (webCam) {
+      const s = webCam.srcObject;
+      webCam.srcObject = null;         // detach first (helps iOS)
+      if (s) s.getTracks().forEach(t => t.stop());
+    }
+  } catch(_) {}
+}
+
+async function ensureDeviceCache() {
+  // Already learned both? done.
+  if (deviceCache.user && deviceCache.environment) return;
+
+  // Need labels -> requires prior permission (you’ll have at least one stream already)
+  const devices = await navigator.mediaDevices.enumerateDevices();
+  const cams = devices.filter(d => d.kind === 'videoinput');
+  if (!cams.length) return;
+
+  // fast guess from labels
+  for (const d of cams) {
+    const L = d.label || '';
+    if (!deviceCache.user && /front|user/i.test(L)) deviceCache.user = d.deviceId;
+    if (!deviceCache.environment && /back|rear|environment/i.test(L)) deviceCache.environment = d.deviceId;
+  }
+
+  // If still missing, probe a couple devices cheaply to read facingMode
+  for (const d of cams) {
+    if (deviceCache.user && deviceCache.environment) break;
+    if ((deviceCache.user && deviceCache.environment) || !d.deviceId) continue;
+
+    let probe;
+    try {
+      probe = await navigator.mediaDevices.getUserMedia({
+        video: { deviceId: { exact: d.deviceId }, width: { ideal: 320 }, height: { ideal: 240 } },
+        audio: false
+      });
+      const track = probe.getVideoTracks()[0];
+      const facing = track?.getSettings?.().facingMode;
+      if (facing) {
+        if (facing === 'user' && !deviceCache.user) deviceCache.user = d.deviceId;
+        if (facing === 'environment' && !deviceCache.environment) deviceCache.environment = d.deviceId;
+      }
+    } catch(_) {
+      // ignore
+    } finally {
+      try { probe?.getTracks().forEach(t => t.stop()); } catch(_) {}
+    }
+  }
+
+  // Fallbacks if platform doesn’t expose facingMode
+  if (!deviceCache.user) deviceCache.user = cams[0]?.deviceId || null;
+  if (!deviceCache.environment) deviceCache.environment = cams[cams.length - 1]?.deviceId || deviceCache.user;
+}
+
+// =====================
+// Robust camera starter (replace your startCamera with this)
+// =====================
+async function startCamera(facing = 'user') {
+  if (!webCam) {
+    webCam = document.createElement('video');
+    webCam.autoplay = true;
+    webCam.muted = true;
+    webCam.setAttribute('playsinline', '');
+    webCam.setAttribute('webkit-playsinline', '');
+    webCam.width = 640;
+    webCam.height = 480;
+  }
+
+  switchingCam = true;
+  hasFrame = false;
+
+  // 1) fully stop the old stream and give iOS a moment
+  stopCurrentStream();
+  await delay(120);
+
+  // 2) fast path: try applyConstraints on current track if available (some Androids)
+  // (only works if there’s an active stream; we just stopped it, so skip this path)
+
+  // 3) learn deviceIds for front/back deterministically
+  try { await ensureDeviceCache(); } catch(_) {}
+
+  // 4) request by deviceId first (most reliable on mobile Safari)
+  const targetId = deviceCache[facing] || null;
+  let stream;
+
+  async function getByFacing() {
+    // fallback when we don’t have deviceId
+    try {
+      return await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { exact: facing } }, audio: false
+      });
+    } catch {
+      return await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: facing } }, audio: false
+      });
+    }
+  }
+
+  try {
+    if (targetId) {
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: { deviceId: { exact: targetId } }, audio: false
+      });
+    } else {
+      stream = await getByFacing();
+    }
+  } catch (e) {
+    // last resort: try the other heuristic
+    stream = await getByFacing();
+  }
+
+  // 5) verify we actually got the requested facing; if not, try to find a matching device
+  let track = stream.getVideoTracks()[0];
+  let gotFacing = track?.getSettings?.().facingMode;
+  if (gotFacing && gotFacing !== facing) {
+    // try the other cached device explicitly
+    try {
+      stopCurrentStream();
+      await delay(80);
+      const altId = facing === 'user' ? deviceCache.user : deviceCache.environment;
+      if (altId) {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: { deviceId: { exact: altId } }, audio: false
+        });
+        track = stream.getVideoTracks()[0];
+        gotFacing = track?.getSettings?.().facingMode || gotFacing;
+      }
+    } catch(_) { /* keep stream as-is */ }
+  }
+
+  // 6) attach and play
+  webCam.srcObject = stream;
+  try { await webCam.play(); } catch(_) {}
+
+  // 7) mark first real frame, rebuild particles for correct resolution
+  const onReady = () => {
+    hasFrame = true;
+    if (particles) {
+      scene.remove(particles);
+      particles.geometry.dispose();
+      particles.material.dispose();
+      particles = null;
+    }
+    createParticles();
+    switchingCam = false;
+
+    // learn & cache deviceId <-> facing from the live track
+    try {
+      const t = webCam.srcObject?.getVideoTracks?.()[0];
+      const s = t?.getSettings?.();
+      if (s?.facingMode && s?.deviceId) deviceCache[s.facingMode] = s.deviceId;
+    } catch(_) {}
+  };
+
+  if ('requestVideoFrameCallback' in webCam) {
+    webCam.requestVideoFrameCallback(() => onReady());
+  } else {
+    webCam.addEventListener('loadeddata', onReady, { once: true });
+  }
+
+  currentFacingMode = facing;
+
+
+// inside startCamera(...) after the stream is live
+try {
+  const s = webCam.srcObject?.getVideoTracks?.()[0]?.getSettings?.();
+  // if browser tells us the actual facingMode, trust it; otherwise use the requested one
+  const facing = s?.facingMode || facing /* from your function arg */;
+  currentFacingMode = facing;
+  shouldMirror = (facing === 'user');
+} catch (_) {
+  currentFacingMode = facing;
+  shouldMirror = (facing === 'user');
+}
+
+
+  window.parent?.postMessage?.({ type: 'cameraChanged', facing: currentFacingMode }, '*');
+}
+
+
+
+// window.addEventListener('orientationchange', () => {
+//   resetCameraPosition();
+//   startCamera(currentFacingMode); // rebuild geometry for new video size
+// });
+
+
 
 function init() {
   renderer = new THREE.WebGLRenderer({
@@ -143,7 +355,7 @@ function init() {
   const directionalLight = new THREE.DirectionalLight(0xffffff, 1.0);
   scene.add(directionalLight);
 
-  initWebCam();
+  startCamera();
 
   const render = () => {
     drawParticles();
@@ -164,7 +376,9 @@ function init() {
     renderer.render(scene, camera);
     requestAnimationFrame(render);
   };
+  window.addEventListener('resize', onResize);
   render();
+
 }
 
 function onResize() {
@@ -183,7 +397,7 @@ function onResize() {
 }
 
 
-function initWebCam() {
+function initWebCamlast() {
   webCam = document.createElement('video');
   webCam.autoplay = true;
   webCam.muted = true;  // ✅ iOS requires mute for autoplay
@@ -215,12 +429,18 @@ function initWebCam() {
   });
 }
 
+let hasFrame = false;
+let switchingCam = false;
 
 function getImageData(video) {
-  const w = video.videoWidth;   // ✅ use videoWidth/Height, not width/height
-  const h = video.videoHeight;
-  if (!w || !h) return null;
+  if (!video) return null;
+  // must have current frame + real dimensions
+  const ready = video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA &&
+                video.videoWidth > 0 && video.videoHeight > 0;
+  if (!ready) return null;
 
+  const w = video.videoWidth;
+  const h = video.videoHeight;
   const canvas = document.createElement('canvas');
   canvas.width = w;
   canvas.height = h;
@@ -228,6 +448,8 @@ function getImageData(video) {
   ctx.drawImage(video, 0, 0, w, h);
   return ctx.getImageData(0, 0, w, h);
 }
+
+
 function createParticles() {
   const imageData = getImageData(webCam);
   const geometry = new THREE.BufferGeometry();
@@ -249,23 +471,18 @@ function createParticles() {
   //   }
   // }
 
+const mirrorSign = shouldMirror ? -1 : 1;
 
-  for (let y = 0; y < height; y++ ) {
-    for (let x = 0; x < width; x++) {
-      const posX = PARTICLE_SPACING * (-x + width / 2);
-      let posY = 0;  // Base height
+for (let y = 0; y < height; y++) {
+  for (let x = 0; x < width; x++) {
+    const posX = PARTICLE_SPACING * (mirrorSign * x - mirrorSign * (width / 2));
+    const posY = 0;
+    const posZ = PARTICLE_SPACING * (y - height / 2);
+    vertices_base.push(posX, posY, posZ);
 
-      // Apply the noise to the y position (height) based on the sine of the passing time
-      const noise = Math.sin(time * Math.PI * 2 * NOISE_FREQUENCY) * NOISE_AMPLITUDE;
-      // posY += noise;
-
-      const posZ = PARTICLE_SPACING * (y - height / 2);
-      vertices_base.push(posX, posY, posZ);
-
-      const r = 1.0, g = 1.0, b = 1.0;
-      colors_base.push(r, g, b);
-    }
+    colors_base.push(1.0, 1.0, 1.0);
   }
+}
 
   // Increment the time in your animation loop
   time += 0.01;
@@ -311,23 +528,28 @@ function createParticles() {
 }
 
 function drawParticles() {
-  if (particles) {
-    const imageData = getImageData(webCam);
-    const length = particles.geometry.attributes.position.count;
-    for (let i = 0; i < length; i++) {
-      const index = i * 4;
-      const r = imageData.data[index] / 255;
-      const g = imageData.data[index + 1] / 255;
-      const b = imageData.data[index + 2] / 255;
-      const gray = (r + g + b) / 3;
+  // skip while switching or before first frame
+  if (switchingCam || !hasFrame || !particles) return;
 
-      particles.geometry.attributes.position.setY(i, gray * PARTICLE_HEIGHT_SCALE);
-      particles.geometry.attributes.color.setXYZ(i, r, g, b);
-    }
-    particles.geometry.attributes.position.needsUpdate = true;
-    particles.geometry.attributes.color.needsUpdate = true;
+  const imageData = getImageData(webCam);
+  if (!imageData) return; // still no frame? bail safely
+
+  const length = particles.geometry.attributes.position.count;
+  // geometry was made for width*height; after a camera change we recreate it
+  for (let i = 0; i < length; i++) {
+    const index = i * 4;
+    const r = imageData.data[index] / 255;
+    const g = imageData.data[index + 1] / 255;
+    const b = imageData.data[index + 2] / 255;
+    const gray = (r + g + b) / 3;
+
+    particles.geometry.attributes.position.setY(i, gray * PARTICLE_HEIGHT_SCALE);
+    particles.geometry.attributes.color.setXYZ(i, r, g, b);
   }
+  particles.geometry.attributes.position.needsUpdate = true;
+  particles.geometry.attributes.color.needsUpdate = true;
 }
+
 
 setInterval(() => {
   if (particles) {

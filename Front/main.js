@@ -2,6 +2,9 @@
 // const db_url = 'https://www.mml-dev.ir/wenodes/backend/data.php';
 // const iframe_url = 'https://www.mml-dev.ir/wenodes/Particle';
 
+// const db_url = 'https://wenodes.org/AV_Experience/backend/data.php';
+// const iframe_url = 'https://wenodes.org/AV_Experience/Particle/index.html';
+
 const db_url = 'http://127.0.0.1:3000/backend/data.php';
 const iframe_url = 'http://127.0.0.1:5500/Front/Particle/index.html';
 let isOpen = false;
@@ -171,19 +174,21 @@ function showStage(stageNumber) {
             });
             logo.style.display = 'none'
             setTimeout(() => {
-                // Animate height slider from 5 to 8 over 3 seconds
-                animateController(heightSlider, 0.1, 2, 3000);
-
-                // Animate threshold slider from 0.7 to 0.4 over 3 seconds
-                animateController(thresholdSlider, 0.1, 0.8, 2000);
-                // animateController(noiseAmountSlider, 0.1, 0.1, 100);
-
-                
-                const iframe = document.getElementById('particleFrame');
-
-                iframe.contentWindow.postMessage({ type: 'setNoiseAmount', value: 0.9 }, '*');
-
+                try {
+                    animateController(heightSlider, 0.1, 2, 4000);
+                    animateController(thresholdSlider, 0.1, 0.8, 3000);
+                    const iframe = document.getElementById('particleFrame');
+                    iframe.contentWindow.postMessage({ type: 'setNoiseAmount', value: 0.9 }, '*');
+                } catch (error) {
+                    setTimeout(() => {
+                        animateController(heightSlider, 0.1, 2, 4000);
+                        animateController(thresholdSlider, 0.1, 0.8, 3000);
+                        const iframe = document.getElementById('particleFrame');
+                        iframe.contentWindow.postMessage({ type: 'setNoiseAmount', value: 0.9 }, '*');
+                    }, 4000);
+                }
             }, 4000);
+
         };
         return
         // startCamera();  
@@ -377,6 +382,8 @@ window.onload = function() {
                 break;
 
             case 'camera-rotate-btn':
+                const iframe = document.getElementById('particleFrame');
+                iframe.contentWindow.postMessage({ type: 'toggleCamera' }, '*');
                 // close music if open
                 if (isOpen) closePanel();
 
@@ -388,6 +395,16 @@ window.onload = function() {
                     rotateBtn.classList.remove('animate');
                 }, 200); // match transition time
                 // do something else
+                const heightValue = heightSlider.value;
+                const thresholdValue = thresholdSlider.value;
+                const noiseAmountValue = noiseAmountSlider.value;
+                animateController(heightSlider, 0.1, heightValue, 4000);
+                animateController(thresholdSlider, 0.1, thresholdValue, 4000);
+                // Send data to the iframe
+                // iframe.contentWindow.postMessage({ type: 'setHeight', value: heightValue }, '*');
+                // iframe.contentWindow.postMessage({ type: 'setThreshold', value: thresholdValue }, '*');
+                // iframe.contentWindow.postMessage({ type: 'setNoiseAmount', value: noiseAmountValue }, '*'); // Set noise amount
+
                 break;
 
             case 'photo-btn':
@@ -607,32 +624,581 @@ giftCopyBtn.addEventListener('click', async () => {
 
 
 
-// Function to close all divs in stage 3
-function closeAllDivsInStage3() {
-    const allDivs = document.querySelectorAll('#stage-3 .main_menu_container .menu_btn');
-    allDivs.forEach(div => {
-        div.classList.remove('active'); // Close all divs by removing 'active' class
+let isBackHandled = false;  // Flag to track if back button is already handled
+
+function closeAllElementsInStage3() {
+    // Close all menu buttons and remove hover effects
+    const buttons = document.querySelectorAll('.menu_btn');
+    buttons.forEach(button => {
+        button.classList.remove('menu_btn_side_hover');
     });
-    console.log('Closed all divs in stage 3');
+
+    // Close all menu panels inside stage 3
+    const menuPanel = document.getElementById('menu-panel');
+    if (menuPanel && menuPanel.classList.contains("show")) {
+        menuPanel.classList.remove("show");
+    }
+
+    // Close video panel if open
+    if (videoOpen) {
+        closeVideoPanel();
+    }
+
+    // Close music selection panel if open
+    if (isOpen) {
+        closePanel();
+    }
+
+    // Close gallery, gift, and avamel list
+    const galleryContent = document.getElementById('galleryContent');
+    const giftContent = document.getElementById('giftContent');
+    const avamelList = document.getElementById('avamel-list');
+
+    if (galleryContent.style.display === 'block') galleryContent.style.display = 'none';
+    if (giftContent.style.display === 'flex') giftContent.style.display = 'none';
+    if (avamelList.style.display === 'block') avamelList.style.display = 'none';
+    
+    console.log('Closed all open elements in stage 3');
 }
 
 // Handle the Android back button press
 function handleBackButton(e) {
-    // If we're in stage 3, close all divs
     const currentStage = document.getElementById('stage-3');
     if (currentStage && currentStage.classList.contains('active')) {
-        e.preventDefault(); // Prevent default back behavior (going to previous page)
-        closeAllDivsInStage3(); // Close all divs in stage 3
-        lastStageOpened = null;
+        e.preventDefault(); // Prevent default back navigation behavior
+        closeAllElementsInStage3(); // Close all elements in stage 3
+        
+        // Flag to prevent multiple triggers on subsequent presses
+        isBackHandled = true;  
+        
         return; // Don't navigate back
     }
 }
 
-// Add event listener for the back button press (Android)
-window.addEventListener('popstate', handleBackButton);
+// Listen to the popstate event
+window.addEventListener('popstate', function (e) {
+    if (isBackHandled) {
+        // We handled the back button already, so push the state again to prevent further navigation
+        history.pushState(null, null, window.location.href);
+        isBackHandled = false; // Reset the flag for next time
+    } else {
+        // Default behavior if the back button isn't handled
+        handleBackButton(e);
+    }
+});
 
-// Push a new state to history to handle back navigation (works on Android browser)
-window.history.pushState(null, null, window.location.href); // Adds a new history entry
+// Push a new state to history to handle the back navigation (Android browser)
+window.history.pushState(null, null, window.location.href);  // Adds a new history entry
+
+
+
+
+// ===== helpers: get your existing slider elements =====
+
+// required: your existing function
+// function animateController(sliderEl, fromValue, toValue, durationMs) { ... }
+
+// ===== core: simple audio-reactive engine =====
+class AudioReactiveEngine {
+  constructor({ onKick, onSnare, onLoudness, statusEl }) {
+    this.onKick = onKick;
+    this.onSnare = onSnare;
+    this.onLoudness = onLoudness;
+    this.statusEl = statusEl;
+
+
+
+    // keep these properties in the constructor:
+    this.mediaNodeMap = new WeakMap(); // HTMLMediaElement -> MediaElementAudioSourceNode
+    this.currentMediaEl = null;
+
+
+
+    this.ctx = null;
+    this.src = null;
+    this.analyser = null;
+    this.freqData = null;
+    this.timeData = null;
+    this.raf = null;
+
+    // detection state
+    this.kickEnv = 0;
+    this.snareEnv = 0;
+    this.loudnessEnv = 0;
+    this.kickHold = 0;
+    this.snareHold = 0;
+
+    this.sampleRate = 44100;
+    this.fftSize = 2048;
+
+    // thresholds (tweakable)
+    this.kickThreshold = 0.3;
+    this.snareThreshold = 0.25;
+    this.loudSmooth = 0.9;   // 0..1, higher = smoother (EMA)
+    this.envDecay = 0.75;    // beat envelope decay per frame
+    this.holdFrames = 6;     // min frames between same-hit triggers
+  }
+
+  _ensureCtx() {
+    if (!this.ctx) {
+      this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+      this.sampleRate = this.ctx.sampleRate;
+      this.analyser = this.ctx.createAnalyser();
+      this.analyser.fftSize = this.fftSize;
+      this.analyser.smoothingTimeConstant = 0.75;
+      this.freqData = new Uint8Array(this.analyser.frequencyBinCount);
+      this.timeData = new Uint8Array(this.analyser.fftSize);
+    }
+  }
+
+// Inside class AudioReactiveEngine { ... }
+
+
+// REPLACE your old useFile() with this:
+async useFile(audioEl) {
+  this._ensureCtx();
+  if (this.ctx.state === 'suspended') await this.ctx.resume();
+
+  // 1) Disconnect previous media node from analyser (leave destination alone)
+  if (this.currentMediaEl && this.mediaNodeMap.has(this.currentMediaEl)) {
+    try { this.mediaNodeMap.get(this.currentMediaEl).disconnect(); } catch {}
+  }
+
+  // 2) Get or create (once) a MediaElementSource for this element
+  let srcNode = this.mediaNodeMap.get(audioEl);
+  if (!srcNode) {
+    srcNode = this.ctx.createMediaElementSource(audioEl);
+    this.mediaNodeMap.set(audioEl, srcNode);
+  }
+
+  // 3) Route: element -> analyser  (analyser -> destination already set elsewhere)
+  try { srcNode.disconnect(); } catch {}           // ensure clean
+  srcNode.connect(this.analyser);
+
+  // 4) Ensure analyser -> destination is connected exactly once
+  // (safe to call repeatedly)
+  try { this.analyser.disconnect(); } catch {}
+  this.analyser.connect(this.ctx.destination);
+
+  this.currentMediaEl = audioEl;
+
+  if (!this.raf) this._startLoop();
+  this._setStatus('file • ready');
+}
+
+
+  async useMic() {
+    this.stop();
+    this._ensureCtx();
+    if (this.ctx.state === 'suspended') await this.ctx.resume();
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
+    this.src = this.ctx.createMediaStreamSource(stream);
+    this.src.connect(this.analyser);
+    this._startLoop();
+    this._setStatus('mic • live');
+  }
+
+  stop() {
+    if (this.raf) cancelAnimationFrame(this.raf);
+    this.raf = null;
+    try { this.src && this.src.disconnect(); } catch {}
+    this.src = null;
+    this._setStatus('idle');
+  }
+
+  _binForHz(hz) {
+    // analyser frequencyBinCount = fftSize/2
+    const nyquist = this.sampleRate / 2;
+    return Math.max(0, Math.min(this.analyser.frequencyBinCount - 1, Math.round(hz / nyquist * this.analyser.frequencyBinCount)));
+  }
+
+  _bandEnergy(hzLo, hzHi) {
+    const lo = this._binForHz(hzLo);
+    const hi = this._binForHz(hzHi);
+    let sum = 0;
+    for (let i = lo; i <= hi; i++) sum += this.freqData[i] / 255;
+    return sum / Math.max(1, (hi - lo + 1));
+  }
+
+  _fullbandRMS() {
+    // quick RMS from time domain 0..255
+    this.analyser.getByteTimeDomainData(this.timeData);
+    let acc = 0;
+    for (let i = 0; i < this.timeData.length; i++) {
+      const v = (this.timeData[i] - 128) / 128;
+      acc += v * v;
+    }
+    return Math.sqrt(acc / this.timeData.length); // ~0..1
+  }
+
+  _startLoop() {
+    const loop = () => {
+      this.analyser.getByteFrequencyData(this.freqData);
+
+      // loudness (full-band RMS)
+      const rms = this._fullbandRMS();
+      this.loudnessEnv = this.loudnessEnv * this.loudSmooth + rms * (1 - this.loudSmooth);
+
+      // kick: low band ~ 30–150 Hz
+      const kickEnergy = this._bandEnergy(30, 150);
+      this.kickEnv = Math.max(kickEnergy, this.kickEnv * this.envDecay);
+
+      // snare: mid-high band ~ 1.5–4.5 kHz
+      const snareEnergy = this._bandEnergy(1500, 4500);
+      this.snareEnv = Math.max(snareEnergy, this.snareEnv * this.envDecay);
+
+      // triggers with simple hysteresis + hold
+      if (this.kickHold <= 0 && kickEnergy - this.kickEnv * 0.6 > this.kickThreshold) {
+        this.kickHold = this.holdFrames;
+        this.onKick && this.onKick(kickEnergy);
+      } else {
+        this.kickHold--;
+      }
+
+      if (this.snareHold <= 0 && snareEnergy - this.snareEnv * 0.6 > this.snareThreshold) {
+        this.snareHold = this.holdFrames;
+        this.onSnare && this.onSnare(snareEnergy);
+      } else {
+        this.snareHold--;
+      }
+
+      // continuous loudness callback (0..1)
+      this.onLoudness && this.onLoudness(this.loudnessEnv);
+
+      this.raf = requestAnimationFrame(loop);
+    };
+    this.raf = requestAnimationFrame(loop);
+  }
+
+  _setStatus(t) { if (this.statusEl) this.statusEl.textContent = t; }
+}
+
+// ===== mapping: randomly pair metrics -> controllers, reshuffle every N seconds =====
+(function setupReactive() {
+//   const audioEl = document.getElementById('songPlayer');
+//   const fileInput = document.getElementById('songFile');
+//   const playBtn = document.getElementById('playPauseBtn');
+//   const micBtn = document.getElementById('useMicBtn');
+  const statusEl = document.getElementById('reactiveStatus');
+
+  // clamp + random helpers
+  const rand = (min, max) => min + Math.random() * (max - min);
+  const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+  const mapRange = (v, inMin, inMax, outMin, outMax) => outMin + (clamp(v, inMin, inMax) - inMin) * (outMax - outMin) / (inMax - inMin);
+
+  // controller ranges you asked for
+  const ranges = {
+    height:   { min: -10, max: 10, dur: 200 },
+    threshold:{ min: 0.1, max: 0.9, dur: 300 },
+    noise:    { min: 0.1, max: 0.9, dur: 100 },
+  };
+
+  // build three controller updaters
+  const controllers = {
+    height(val, fast=false) {
+      const from = parseFloat(heightSlider?.value ?? 0);
+      const to = clamp(val, ranges.height.min, ranges.height.max);
+      animateController(heightSlider, from, to, fast ? 120 : ranges.height.dur);
+    },
+    threshold(val, fast=false) {
+      const from = parseFloat(thresholdSlider?.value ?? 0.5);
+      const to = clamp(val, ranges.threshold.min, ranges.threshold.max);
+      animateController(thresholdSlider, from, to, fast ? 140 : ranges.threshold.dur);
+    },
+    noise(val, fast=false) {
+      const from = parseFloat(noiseAmountSlider?.value ?? 0.5);
+      const to = clamp(val, ranges.noise.min, ranges.noise.max);
+      animateController(noiseAmountSlider, from, to, fast ? 100 : ranges.noise.dur);
+    }
+  };
+
+  // metrics -> controllers mapping that reshuffles periodically
+  const metrics = ['kick','snare','loudness'];
+  const controllerKeys = ['height','threshold','noise'];
+  let mapping = {};
+  let lastShuffle = 0;
+  const shuffleIntervalMs = 10000;
+
+  function shuffleMapping() {
+    const shuffled = controllerKeys.slice().sort(() => Math.random() - 0.5);
+    mapping.kick = shuffled[0];
+    mapping.snare = shuffled[1];
+    mapping.loudness = shuffled[2];
+    lastShuffle = performance.now();
+    statusEl.textContent = `map: kick→${mapping.kick}, snare→${mapping.snare}, loudness→${mapping.loudness}`;
+  }
+  shuffleMapping();
+
+  // beat to controller actions
+  const onKick = (energy) => {
+    if (performance.now() - lastShuffle > shuffleIntervalMs) shuffleMapping();
+    const target = mapping.kick;
+    const toVal = rand(ranges[target === 'height' ? 'height' : target].min, ranges[target === 'height' ? 'height' : target].max);
+    controllers[target](toVal, true);
+  };
+
+  const onSnare = (energy) => {
+    if (performance.now() - lastShuffle > shuffleIntervalMs) shuffleMapping();
+    const target = mapping.snare;
+    const toVal = rand(ranges[target === 'height' ? 'height' : target].min, ranges[target === 'height' ? 'height' : target].max);
+    controllers[target](toVal, true);
+  };
+
+  const onLoudness = (lvl) => {
+    // smooth follow: map 0..1 loudness into appropriate range
+    const target = mapping.loudness;
+    const r = ranges[target === 'height' ? 'height' : target];
+    const toVal = mapRange(lvl, 0.05, 0.35, r.min, r.max);
+    controllers[target](toVal, false);
+  };
+
+  const engine = new AudioReactiveEngine({ onKick, onSnare, onLoudness, statusEl });
+
+  // ui wiring
+//   fileInput.addEventListener('change', async (e) => {
+//     const file = e.target.files?.[0];
+//     if (!file) return;
+//     // play locally without “downloading”
+//     audioEl.src = URL.createObjectURL(file);
+//     audioEl.onloadedmetadata = () => { playBtn.disabled = false; statusEl.textContent = 'file • loaded'; };
+//     await engine.useFile(audioEl);
+//   });
+
+//   playBtn.addEventListener('click', async () => {
+//     if (audioEl.paused) {
+//       try { await audioEl.play(); playBtn.textContent = 'Pause'; statusEl.textContent = 'playing'; }
+//       catch (e) { console.warn(e); }
+//     } else {
+//       audioEl.pause(); playBtn.textContent = 'Play'; statusEl.textContent = 'paused';
+//     }
+//   });
+
+//   micBtn.addEventListener('click', async () => {
+//     try {
+//       await engine.useMic();
+//       playBtn.textContent = 'Play';
+//       playBtn.disabled = true;
+//       if (!audioEl.paused) audioEl.pause();
+//     } catch (e) {
+//       statusEl.textContent = 'mic denied';
+//       console.warn('mic error', e);
+//     }
+//   });
+
+  // optional: reshuffle mapping on spacebar
+  window.addEventListener('keydown', (ev) => {
+    // if (ev.code === 'Space') { ev.preventDefault(); shuffleMapping(); }
+  });
+})();
+
+
+
+
+
+
+
+// ===== song libraries per genre (swap with your own links; must be CORS-allowed) =====
+const SONGS = {
+  techno: [
+    'https://wenodes.org/AV_Experience/asset/Makan Ashgvari Ahvaz.mp3',
+    // 'https://your.cdn/techno/track2.mp3',
+  ],
+  ambient: [
+    'https://wenodes.org/AV_Experience/asset/Amir%20Darabi%20-%20Beraghs.mp3',
+  ],
+  electronic: [
+    'https://wenodes.org/AV_Experience/asset/nima ramezan.mp3',
+  ],
+  house: [
+    'https://wenodes.org/AV_Experience/asset/Roozbeh Fadavi Didar.9.wav',
+    // 'https://testsong.b-cdn.net/Yechi Bede Dod konm (320).mp3',
+  ],
+};
+
+// quick helpers
+const randIdx = (arr) => Math.floor(Math.random() * arr.length);
+const byId = (id) => document.getElementById(id);
+
+
+// === Blob loader: prevents IDM intercepting direct MP3 links ===
+async function toBlobUrl(fileUrl, mime = 'audio/mpeg') {
+  const res = await fetch(fileUrl, { credentials: 'omit', cache: 'force-cache' });
+  if (!res.ok) throw new Error(`Failed to fetch audio ${res.status}`);
+  const buf = await res.arrayBuffer();
+  const blob = new Blob([buf], { type: mime });
+  return URL.createObjectURL(blob);
+}
+
+async function loadTrackToAudioEl(audioEl, fileUrl, mime='audio/mpeg') {
+  if (audioEl._objectUrl) { try { URL.revokeObjectURL(audioEl._objectUrl); } catch {} }
+  const objUrl = await toBlobUrl(fileUrl, mime);
+  audioEl.src = objUrl;
+  audioEl._objectUrl = objUrl;
+  audioEl.setAttribute('controlslist', 'nodownload noplaybackrate');
+  audioEl.preload = 'auto';
+}
+
+// helper to pick & set a random song for a genre
+async function setRandomTrack(genre) {
+  const el = audioEls[genre];
+  const list = SONGS[genre] || [];
+  if (!list.length) return;
+  const url = list[Math.floor(Math.random() * list.length)];
+  await loadTrackToAudioEl(el, url, 'audio/mpeg');
+}
+
+
+
+// link buttons and audio tags
+const genreButtons = Array.from(document.querySelectorAll('#genre-controls .genre-btn'));
+const audioEls = {
+  techno: byId('audio-techno'),
+  ambient: byId('audio-ambient'),
+  electronic: byId('audio-electronic'),
+  house: byId('audio-house'),
+};
+
+// status badge from previous UI (optional)
+const statusEl = document.getElementById('reactiveStatus');
+
+// make/keep one AudioReactiveEngine instance for these players
+// if you already created `engine` earlier, reuse it; otherwise expose it:
+window._audioReactiveEngine = window._audioReactiveEngine || (function () {
+  // reuse the callbacks from earlier code:
+  // if you kept them inside an IIFE, recreate minimal ones mapping to your sliders:
+  const ranges = { height:{min:-10,max:10,dur:200}, threshold:{min:0.1,max:0.9,dur:300}, noise:{min:0.1,max:0.9,dur:100} };
+  const clamp = (v,a,b)=>Math.min(b,Math.max(a,v));
+  const mapRange=(v,i0,i1,o0,o1)=>o0+(Math.min(i1,Math.max(i0,v))-i0)*(o1-o0)/(i1-i0);
+
+  const controllers = {
+    height(val, fast=false){ animateController(heightSlider, parseFloat(heightSlider.value||0), clamp(val, ranges.height.min, ranges.height.max), fast?120:ranges.height.dur); },
+    threshold(val, fast=false){ animateController(thresholdSlider, parseFloat(thresholdSlider.value||0.5), clamp(val, ranges.threshold.min, ranges.threshold.max), fast?140:ranges.threshold.dur); },
+    noise(val, fast=false){ animateController(noiseAmountSlider, parseFloat(noiseAmountSlider.value||0.5), clamp(val, ranges.noise.min, ranges.noise.max), fast?100:ranges.noise.dur); },
+  };
+  const mapping = { kick:'height', snare:'threshold', loudness:'noise' };
+
+  const onKick = () => {
+    const r = ranges[mapping.kick]; const to = r.min + Math.random()*(r.max-r.min);
+    controllers[mapping.kick](to, true);
+  };
+  const onSnare = () => {
+    const r = ranges[mapping.snare]; const to = r.min + Math.random()*(r.max-r.min);
+    controllers[mapping.snare](to, true);
+  };
+  const onLoudness = (lvl) => {
+    const r = ranges[mapping.loudness];
+    controllers[mapping.loudness](mapRange(lvl, 0.05, 0.35, r.min, r.max), false);
+  };
+
+  return new AudioReactiveEngine({ onKick, onSnare, onLoudness, statusEl });
+})();
+
+// wire each audio element into the engine when used
+function connectAudioElToEngine(audioEl) {
+  // if already connected once, just reuse; createMediaElementSource can only be used once per element
+  if (!audioEl._connectedToEngine) {
+    window._audioReactiveEngine.useFile(audioEl);
+    audioEl._connectedToEngine = true;
+  } else {
+    // ensure analysis is running
+    window._audioReactiveEngine.useFile(audioEl);
+  }
+}
+
+// preload: assign one random track per genre (or the first if only one)
+Object.entries(audioEls).forEach(([genre, el]) => {
+  const list = SONGS[genre] || [];
+  if (list.length) {
+    el.src = list[randIdx(list)];
+    // optional: advance to a new random track when one ends
+    el.addEventListener('ended', () => {
+      if (!SONGS[genre]?.length) return;
+      el.src = SONGS[genre][randIdx(SONGS[genre])];
+      el.play().catch(()=>{});
+    });
+  }
+});
+
+// state
+let currentGenre = null;       // 'techno' | 'ambient' | 'electronic' | 'house' | null
+let isPlaying = false;
+
+// UI helpers
+function setActiveButton(genre) {
+  genreButtons.forEach(btn => {
+    const g = btn.getAttribute('data-genre');
+    if (g === genre && isPlaying) {
+      btn.classList.add('btn-active'); // adjust to your CSS framework
+      btn.textContent = btn.textContent.replace(/^(Play|Start|▶️)?/,'').trim();
+      if (!/⏸/.test(btn.textContent)) btn.textContent = '⏸ ' + btn.textContent;
+    } else {
+      btn.classList.remove('btn-active');
+      const label = btn.getAttribute('data-genre');
+      const pretty = {
+        techno: 'ماکان اشکواری ',
+        ambient: 'امیر دارابی ',
+        electronic: 'نیما رمضان ',
+        house: 'روزبه فدوی '
+      }[label] || label;
+      btn.textContent = (currentGenre===g && !isPlaying ? '▶️ ' : '') + pretty;
+    }
+  });
+}
+
+// click logic: toggle play/stop; switch instantly when choosing a new genre
+genreButtons.forEach(btn => {
+  btn.addEventListener('click', async () => {
+    const chosen = btn.getAttribute('data-genre');
+    const chosenEl = audioEls[chosen];
+
+    if (!SONGS[chosen]?.length) {
+      if (statusEl) statusEl.textContent = `no tracks for ${chosen}`;
+      return;
+    }
+
+    // if clicking the same genre: toggle play/pause
+    if (currentGenre === chosen) {
+      if (isPlaying) {
+        chosenEl.pause();
+        isPlaying = false;
+        if (statusEl) statusEl.textContent = `${chosen} • paused`;
+      } else {
+        connectAudioElToEngine(chosenEl);
+        try { await chosenEl.play(); isPlaying = true; if (statusEl) statusEl.textContent = `${chosen} • playing`; }
+        catch(e){ console.warn(e); }
+      }
+      setActiveButton(chosen);
+      return;
+    }
+
+    // switching genre: stop previous, start new instantly
+    if (currentGenre) {
+      const prevEl = audioEls[currentGenre];
+      prevEl && prevEl.pause();
+    }
+    currentGenre = chosen;
+
+    // if the chosen element has no src yet (lists can be dynamic), give it one
+    if (!chosenEl.src) await setRandomTrack(chosen);
+
+    connectAudioElToEngine(chosenEl);
+    try {
+      await chosenEl.play();
+      isPlaying = true;
+      if (statusEl) statusEl.textContent = `${chosen} • playing`;
+    } catch (e) {
+      isPlaying = false;
+      if (statusEl) statusEl.textContent = `${chosen} • ready`;
+      console.warn(e);
+    }
+    setActiveButton(chosen);
+  });
+});
+
+
+
+
+
 };
 
 
