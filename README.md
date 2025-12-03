@@ -5,8 +5,9 @@ thanks to [FTD](https://github.com/FollowTheDarkside) for the code idea and code
 
 you can test it in [live Demo](https://www.mml-dev.ir/wenodes/).
 
-
-| ![Demo png](assets/image.png) |[![Demo gif](assets/AV_test.gif)](https://your-live-demo1-link.com)|
+| PNG Thumbnail | GIF Preview |
+|---------------|------------|
+| ![Demo png](assets/image.png) |[![Demo gif](assets/AV_test.gif)](https://www.mml-dev.ir/wenodes)|
 
 
 Particle Audio Visualizer
