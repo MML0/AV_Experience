@@ -1,3 +1,14 @@
+thanks to [FTD](https://github.com/FollowTheDarkside) for the code idea and code [Original Particle Audio Visualizer](https://github.com/FollowTheDarkside/threejs-webcam-particle-visualizer) repository.  
+
+
+## 📹 Demo
+
+you can test it in [live Demo](https://www.mml-dev.ir/wenodes/).
+
+
+| ![Demo png](assets/image.png) |[![Demo gif](assets/AV_test.gif)](https://your-live-demo1-link.com)|
+
+
 Particle Audio Visualizer
 
 This web-based application allows users to control and visualize a particle system in real-time, synchronized with audio. The visualizer reacts to audio frequencies, providing an interactive and dynamic experience. You can adjust the visual effects using sliders, randomize the settings, and even capture frames of the animation.
@@ -37,3 +48,5 @@ Press the "Download Frame" button to capture the current frame of the visualizer
 Randomize:
 
 Click "Randomize Sliders" to change all parameters to random values and view a fresh visualization.
+
+Some code snippets and ideas were adapted with permission under the [MIT License](https://opensource.org/licenses/MIT).
