@@ -1,5 +1,7 @@
 thanks to [FTD](https://github.com/FollowTheDarkside) for the core idea and code [Original Particle Audio Visualizer](https://github.com/FollowTheDarkside/threejs-webcam-particle-visualizer) repository.  
 
+Special Thanks to [Arman-H-R](https://github.com/Arman-H-R) for the collaboration and  help — your contributions made this project much better.
+
 
 ## 📹 Demo
 

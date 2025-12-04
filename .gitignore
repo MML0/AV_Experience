@@ -4,3 +4,4 @@ backend/config.php
 Front/qrcode.min.js
 Front/qrtest.html
 Front
+.htaccess
